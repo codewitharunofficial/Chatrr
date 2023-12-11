@@ -1,15 +1,17 @@
+import moment from 'moment';
 import {Text, View, Image, StyleSheet} from 'react-native'
 
-const ChatList = () => {
+const ChatList = ({ chat }) => {
+  console.log(chat.item.user);
   return (
     <View style={styles.container}>
-      <Image src='https://cdn2.vectorstock.com/i/1000x1000/98/56/cute-little-boy-cartoon-vector-21539856.jpg' style={styles.image} />
+      <Image src={chat.item.user?.image} style={styles.photo} />
       <View style={styles.content}>
         <View style={styles.row}>
-          <Text numberOfLines={1} style={styles.name}>Arun</Text>
-          <Text numberOfLines={1} style={styles.subTitle}>12.30 P.M</Text>
+          <Text numberOfLines={1} style={styles.name}>{chat.item?.user?.name}</Text>
+          <Text numberOfLines={1} style={styles.subTitle}>{moment(chat.item?.lastMessage?.createdAt).fromNow()}</Text>
         </View>
-          <Text numberOfLines={2} style={styles.subTitle}>Hi There, I'm Using Whatsapp 2.0 Created by Arun. He's a good developer & actuall a more of a good developer</Text>
+          <Text numberOfLines={2} style={styles.subTitle}>{chat.item?.lastMessage?.text}</Text>
       </View>
     </View>
   )
@@ -20,10 +22,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 10,
     marginVertical: 10,
-
-    height: 70
+    height: 70,
   },
-  image: {
+  photo: {
     width: 50,
     height: 50,
     borderRadius: 30,
