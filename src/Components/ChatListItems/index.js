@@ -2,7 +2,6 @@ import moment from 'moment';
 import {Text, View, Image, StyleSheet} from 'react-native'
 
 const ChatList = ({ chat }) => {
-  console.log(chat.item.user);
   return (
     <View style={styles.container}>
       <Image src={chat.item.user?.image} style={styles.photo} />
