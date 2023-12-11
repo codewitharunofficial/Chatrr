@@ -6,7 +6,7 @@ const Message = ({message}) => {
 
   return (
     <View style={[styles.container, {
-        backgroundColor: message.item.user.id === 'ui' ? 'lightgreen' : 'white',
+        backgroundColor: message.item.user.id === 'u1' ? '#DCF8C5' : 'white',
         alignSelf: message.item.user.id === 'u1' ? 'flex-end' : 'flex-start',
     }]}>
       <Text>{message.item.text}</Text>
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
      },
     time: {
         color: 'green',
-        alignSelf: 'flex-end'
+        alignSelf: 'flex-end',
     }
 })
 
