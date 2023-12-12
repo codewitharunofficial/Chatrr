@@ -1,9 +1,14 @@
 import moment from 'moment';
-import {Text, View, Image, StyleSheet} from 'react-native'
+import {Text, Pressable, Image, StyleSheet, View} from 'react-native'
+import { useNavigation } from '@react-navigation/native';
 
 const ChatList = ({ chat }) => {
+
+
+  const navigate = useNavigation();
+
   return (
-    <View style={styles.container}>
+    <Pressable onPress={() => navigate.navigate('Conversation', {id: chat.item.id, name: chat.item.user.name})} style={styles.container}>
       <Image src={chat.item.user?.image} style={styles.photo} />
       <View style={styles.content}>
         <View style={styles.row}>
@@ -12,7 +17,7 @@ const ChatList = ({ chat }) => {
         </View>
           <Text numberOfLines={2} style={styles.subTitle}>{chat.item?.lastMessage?.text}</Text>
       </View>
-    </View>
+    </Pressable>
   )
 }
 
@@ -21,7 +26,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 10,
     marginVertical: 10,
-    height: 70,
+
   },
   photo: {
     width: 50,

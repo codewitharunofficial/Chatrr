@@ -3,7 +3,7 @@
     "id": "1",
     "user": {
       "id": "u2",
-      "name": "Lukas",
+      "name": "Arun",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/lukas.jpeg"
     },
     "lastMessage": {
@@ -16,7 +16,7 @@
     "id": "2",
     "user": {
       "id": "u3",
-      "name": "Daniil Top",
+      "name": "Keshu",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/1.jpg"
     },
     "lastMessage": {
@@ -29,7 +29,7 @@
     "id": "3",
     "user": {
       "id": "u4",
-      "name": "Alex",
+      "name": "Gaggu",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/8.png"
     },
     "lastMessage": {
@@ -42,7 +42,7 @@
     "id": "4",
     "user": {
       "id": "u5",
-      "name": "Vlad",
+      "name": "Bajju",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/jeff.jpeg"
     },
     "lastMessage": {
@@ -55,7 +55,7 @@
     "id": "5",
     "user": {
       "id": "u6",
-      "name": "Elon Musk",
+      "name": "Rahul Sharma",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/elon.png"
     },
     "lastMessage": {
@@ -68,7 +68,7 @@
     "id": "6",
     "user": {
       "id": "u7",
-      "name": "Adrian",
+      "name": "Nangu",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/graham.jpg"
     },
     "lastMessage": {
@@ -81,7 +81,7 @@
     "id": "7",
     "user": {
       "id": "u8",
-      "name": "Borja",
+      "name": "Jassu",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/zuck.jpeg"
     },
     "lastMessage": {
@@ -94,7 +94,7 @@
     "id": "8",
     "user": {
       "id": "u9",
-      "name": "Mom",
+      "name": "A Kay",
       "image": "https://image.shutterstock.com/image-vector/super-mom-hero-superhero-cartoon-600w-720015928.jpg"
     },
     "lastMessage": {
@@ -107,7 +107,7 @@
     "id": "9",
     "user": {
       "id": "u9",
-      "name": "Andrei",
+      "name": "Chhotu",
       "image": "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/4.jpg"
     },
     "lastMessage": {

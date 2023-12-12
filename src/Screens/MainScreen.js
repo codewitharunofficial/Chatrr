@@ -7,6 +7,7 @@ const MainScreen = () => {
     <FlatList
       data={chats}
       renderItem={(item) => <ChatList chat={item} />}
+      style={{backgroundColor: 'white'}}
     />
   );
 };
