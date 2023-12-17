@@ -31,7 +31,7 @@ const Navigator = () => {
           component={UploadPhotoScreen}
           options={{ headerShown: true }}
         />
-        
+
         <Stack.Screen
           name="Login"
           component={LoginScreen}
