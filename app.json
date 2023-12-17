@@ -9,7 +9,21 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+      "plugins": [
+        [
+          "expo-document-picker", {
+             "storagePermission": "Allow Chatrr to access you device storage"
+          },
+          "expo-image-picker",
+          {
+            "photosPermission": "The App need access to your media"
+          },
+          {
+            "iCloudContainerEnvironment": "Production"
+          }
+        ]
+      ]
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,7 +35,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "CAMERA", "WRITE_EXTERNAL_STORAGE", "READ_CONTACTS", "READ_MEDIA_IMAGES"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
