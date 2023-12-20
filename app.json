@@ -1,19 +1,20 @@
 {
   "expo": {
-    "name": "whatsapp",
+    "name": "chatrr",
     "slug": "whatsapp",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "https://www.canva.com/design/DAF3bgMpa4I/FzJUPN4jw41BTccz3HPI5w/edit?utm_content=DAF3bgMpa4I&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "https://www.canva.com/design/DAF3bgMpa4I/FzJUPN4jw41BTccz3HPI5w/edit?utm_content=DAF3bgMpa4I&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
       "plugins": [
         [
-          "expo-document-picker", {
-             "storagePermission": "Allow Chatrr to access you device storage"
+          "expo-document-picker",
+          {
+            "storagePermission": "Allow Chatrr to access you device storage"
           },
           "expo-image-picker",
           {
@@ -43,11 +44,20 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "CAMERA", "WRITE_EXTERNAL_STORAGE", "READ_CONTACTS", "READ_MEDIA_IMAGES"
-      ]
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_CONTACTS",
+        "READ_MEDIA_IMAGES"
+      ],
+      "package": "com.codewitharun.chatrr"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "64652f17-8852-41ad-b3ac-3d501ec97aaf"
+      }
     }
   }
 }

@@ -2,20 +2,43 @@ import { View, TextInput, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { io } from "socket.io-client";
+import axios from "axios";
+import { useAuth } from "../../Contexts/auth";
 
-const InputBox = () => {
+const InputBox = ({ reciever }) => {
   const [input, setInput] = useState("");
 
-  const onSend = () => {
-    console.warn("Sending a Message", input);
+  const [auth] = useAuth();
 
-    setInput("");
+  const qureies = {
+    reciever: reciever,
+    sender: auth.user._id,
+    message: input
+  }
+
+  const onSend = () => {
+
+    const  sendMessage = async () => {
+
+         try {
+
+          const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/messages/send-message`, qureies);
+          console.log(data);
+          setInput("");
+          
+         } catch (error) {
+            console.log(error.message);
+         }
+
+    }
+
+    
   };
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.container}>
       <AntDesign name="plus" size={20} color={"white"} style={styles.plus} />
-
       <TextInput
         value={input}
         onChangeText={setInput}

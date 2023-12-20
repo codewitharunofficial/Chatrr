@@ -1,12 +1,14 @@
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../Contexts/auth";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import Toast from 'react-native-simple-toast';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SettingsScreen = () => {
   const [auth, setAuth] = useAuth();
-
+  const [user, setUser] = useState([]);
 
   const navigation = useNavigation();
 
@@ -21,11 +23,12 @@ const SettingsScreen = () => {
     navigation.navigate("Login");
   };
 
+
   return (
     <View style={styles.container}>
       <Pressable style={styles.pressable}>
         <Image
-          source={{ uri: auth?.user?.photo?.url }}
+          source={{uri: auth?.user?.photo?.url}}
           height={60}
           width={60}
           style={{ borderRadius: 50 }}
@@ -38,9 +41,9 @@ const SettingsScreen = () => {
               fontWeight: "700",
             }}
           >
-            {auth.user.name}
+            {auth?.user?.name}
           </Text>
-          <Text>{auth.user.phone}</Text>
+          <Text>{auth?.user?.phone}</Text>
           
           </View>
         </View>

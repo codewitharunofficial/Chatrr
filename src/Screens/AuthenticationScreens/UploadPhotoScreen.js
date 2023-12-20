@@ -5,6 +5,7 @@ import { useAuth } from "../../Contexts/auth";
 import * as ImagePicker from 'expo-image-picker';
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import Toast from 'react-native-simple-toast'; 
 
 const UploadPhotoScreen = () => {
   const [auth, setAuth] = useAuth();
@@ -49,7 +50,7 @@ const UploadPhotoScreen = () => {
            
            console.log(formdata);
            
-           const {data} = await axios.post(`http://192.168.161.47:6969/api/v1/media/upload/${id}`, formdata, {
+           const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/media/upload/${id}`, formdata, {
             headers:{
               Accept: 'application/json',
               'Content-Type': 'multipart/form-data'

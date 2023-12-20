@@ -32,7 +32,7 @@ const LoginScreen = () => {
   const logIn = async () => {
 
     try {
-      const {data} = await axios.post('http://192.168.161.47:6969/api/v1/users/login', {...value})
+      const {data} = await axios.post('https://android-chattr-app.onrender.com/api/v1/users/login', {...value})
       console.log(data);
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
@@ -41,6 +41,14 @@ const LoginScreen = () => {
           user: data.user,
           token: data.token
         });
+
+        const socket = io('https://android-chattr-app.onrender.com', {
+          reconnectionDelay: 3000
+        })
+
+        socket.on('connecion', (res) => {
+          res.send(data.user._id);
+        })
         
         AsyncStorage.setItem('auth', JSON.stringify(data));
         navigation.navigate('Home');
@@ -150,7 +158,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 10,
     marginTop: 10,
-    
   }
 });
 

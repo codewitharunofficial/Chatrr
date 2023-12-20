@@ -15,13 +15,12 @@ const Navigator = () => {
 
   const [auth] = useAuth();
 
-
   return (
     <NavigationContainer>
       <Stack.Navigator>
-
         
-        <Stack.Screen
+          
+      <Stack.Screen
           name="SignUp"
           component={SignUpScreen}
           options={{ headerShown: false }}
@@ -37,23 +36,24 @@ const Navigator = () => {
           component={LoginScreen}
           options={{ headerShown: false }}
         />
-          <Stack.Screen
-            name="Home"
-            component={MainTabNavigation}
-            options={{ headerShown: false }}
-          />
-        
-          
+        <Stack.Screen
+          name="Home"
+          component={MainTabNavigation}
+          options={{ headerShown: false }}
+        />
+
         <Stack.Screen
           name="Conversation"
           component={Conversation}
           options={{ headerTitleAlign: "center" }}
         />
+
         <Stack.Screen
           name="Contacts"
           component={ContactScreen}
           options={{ headerTitleAlign: "center" }}
         />
+
         <Stack.Screen
           name="Settings"
           component={SettingsScreen}
@@ -64,6 +64,8 @@ const Navigator = () => {
           component={UserProfileScreen}
           options={{ headerTitleAlign: "center" }}
         />
+        
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

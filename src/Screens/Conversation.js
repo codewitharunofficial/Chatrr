@@ -1,5 +1,5 @@
 import { View, Text, ImageBackground, StyleSheet, FlatList, } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import messages from '../../assets/WhatsApp - Asset Bundle/assets/data/messages.json'
 import Message from '../Components/Message';
 import InputBox from '../Components/Input/InputBox';
@@ -7,15 +7,16 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useEffect } from 'react';
 
 const Conversation = () => {
-
+  
+  const [reciever, setReciever] = useState('');
 
   const route = useRoute();
   const navigation = useNavigation();
 
 
   useEffect(() => {
-    navigation.setOptions({title: route.params.name })
-  }, [route.params.name])
+    navigation.setOptions({title: route.params.name}, setReciever(route.params.id));
+  }, [route.params.name]);
 
 
   return (
@@ -29,7 +30,7 @@ const Conversation = () => {
       style={styles.list}
       />
     </ImageBackground>
-      <InputBox/>
+      <InputBox reciever={reciever} />
       </>
     
   )
