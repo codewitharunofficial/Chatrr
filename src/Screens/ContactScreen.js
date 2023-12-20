@@ -13,12 +13,15 @@ import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { AntDesign } from "@expo/vector-icons";
+import { useAuth } from "../Contexts/auth";
 
 const ContactScreen = () => {
   const [contacts, setContacts] = useState([]);
-  const [reciever, setReciever] = useState([]);
+  const [receiver, setReceiver] = useState([]);
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
+
+  const [auth] = useAuth();
 
   //navigate
   const navigation = useNavigation();
@@ -42,7 +45,7 @@ const ContactScreen = () => {
   const searchUser = async () => {
     try {
       const { data } = await axios.get(
-        `https://android-chattr-app.onrender.com/api/v1/users/search-user/${search}`
+        `http://192.168.161.47:6969/api/v1/users/search-user/${search}`
       );
       setUsers(data?.searchedResults);
     } catch (error) {
@@ -90,12 +93,32 @@ const ContactScreen = () => {
             marginTop: 5,
             marginBottom: 20,
             marginLeft: 20,
-            borderRadius: 20
+            borderRadius: 20,
           }}
           data={users}
           renderItem={(items) => (
-            <Pressable onPress={() => navigation.navigate('Conversation', {id: items.item._id, name: items.item.name})} style={styles.container}>
-              <Image source={{uri: items?.item?.profilePhoto?.url}} style={styles.photo} />
+            <Pressable
+              onPress={async () => {
+                try {
+                  const { data } = await axios.post(
+                    "http://192.168.161.47:6969/api/v1/messages/create-conversation",
+                    { sender: auth.user._id, receiver: items.item._id }
+                  );
+                  console.log(data);
+                  navigation.navigate("Conversation", {
+                    id: items.item._id,
+                    name: items.item.name,
+                  });
+                } catch (error) {
+                  console.log(error);
+                }
+              }}
+              style={styles.container}
+            >
+              <Image
+                source={{ uri: items?.item?.profilePhoto?.url }}
+                style={styles.photo}
+              />
               <View style={styles.content}>
                 <View style={styles.row}>
                   <Text numberOfLines={1} style={styles.name}>
@@ -103,11 +126,11 @@ const ContactScreen = () => {
                   </Text>
                 </View>
               </View>
-              </Pressable>
+            </Pressable>
           )}
         />
       ) : null}
-      
+
       <Text style={{ fontWeight: "bold" }}>{contacts.length}</Text>
       <FlatList
         style={{ width: "100%", padding: 20, marginTop: 50 }}
@@ -183,37 +206,36 @@ const ContactScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: 10,
     marginVertical: 10,
     borderBottomWidth: 1,
-
   },
   photo: {
     width: 50,
     height: 50,
     borderRadius: 30,
-    marginRight: 10
+    marginRight: 10,
   },
   content: {
     flex: 1,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'lightgray'
+    borderBottomColor: "lightgray",
   },
   row: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
   },
   name: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 20,
-    flex: 1
+    flex: 1,
   },
   subTitle: {
-    color: 'grey'
-  }
-})
+    color: "grey",
+  },
+});
 
 export default ContactScreen;

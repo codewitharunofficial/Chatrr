@@ -1,31 +1,58 @@
-import { View, TextInput, StyleSheet } from "react-native";
-import React, { useState } from "react";
+import { View, TextInput, StyleSheet, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { io } from "socket.io-client";
 import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
+import socketServcies from "../../Utils/SocketServices";
+import ChatList from "../ChatListItems";
+import Conversation from "../../Screens/Conversation";
 
 const InputBox = ({ reciever }) => {
   const [input, setInput] = useState("");
+  const [chat, setChat] = useState([]);
 
   const [auth] = useAuth();
 
   const qureies = {
     reciever: reciever,
     sender: auth.user._id,
-    message: input
+    message: input,
+    convoId : chat[0]?.convo?._id
   }
 
-  const onSend = () => {
+
+  useEffect(() => {
+    socketServcies.initializeSocket()
+  }, []);
+
+
+  useEffect(() => {
+    socketServcies.on('recieved-message', (msg) => {
+      let cloneArray = [...chat]
+      setChat(cloneArray.concat(msg));
+      console.log(chat[0].convo);
+      
+
+      if(chat) {
+        <FlatList 
+        data={chat}
+        renderItem={(item) => <Conversation data={item} /> }
+        />
+      }
+    })
+  }, []);
 
     const  sendMessage = async () => {
 
          try {
-
-          const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/messages/send-message`, qureies);
-          console.log(data);
-          setInput("");
+          if(!!input) {
+            socketServcies.emit('send-message', qureies);
+            setInput('');
+             return;
+            }
+            alert('Message Cannot me empty');
           
          } catch (error) {
             console.log(error.message);
@@ -33,8 +60,6 @@ const InputBox = ({ reciever }) => {
 
     }
 
-    
-  };
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.container}>
@@ -48,7 +73,7 @@ const InputBox = ({ reciever }) => {
 
       <MaterialIcons
         style={styles.send}
-        onPress={onSend}
+        onPress={sendMessage}
         name="send"
         size={20}
         color={"white"}

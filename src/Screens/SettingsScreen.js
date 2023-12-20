@@ -5,6 +5,7 @@ import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import io from 'socket.io-client'
 
 const SettingsScreen = () => {
   const [auth, setAuth] = useAuth();

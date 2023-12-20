@@ -6,8 +6,8 @@ const Message = ({message}) => {
 
   return (
     <View style={[styles.container, {
-        backgroundColor: message.item.user.id === 'u1' ? '#DCF8C5' : 'white',
-        alignSelf: message.item.user.id === 'u1' ? 'flex-end' : 'flex-start',
+        backgroundColor: message.item.user.role === 'sender' ? '#DCF8C5' : 'white',
+        alignSelf: message.item.user.id === 'sender' ? 'flex-end' : 'flex-start',
     }]}>
       <Text>{message.item.text}</Text>
       <Text style={styles.time}>{moment(message.item.createdAt).fromNow()}</Text>

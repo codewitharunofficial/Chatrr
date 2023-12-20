@@ -32,7 +32,7 @@ const LoginScreen = () => {
   const logIn = async () => {
 
     try {
-      const {data} = await axios.post('https://android-chattr-app.onrender.com/api/v1/users/login', {...value})
+      const {data} = await axios.post('http://192.168.161.47:6969/api/v1/users/login', {...value})
       console.log(data);
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
@@ -42,7 +42,7 @@ const LoginScreen = () => {
           token: data.token
         });
 
-        const socket = io('https://android-chattr-app.onrender.com', {
+        const socket = io('http://192.168.161.47:6969', {
           reconnectionDelay: 3000
         })
 
