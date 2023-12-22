@@ -4,10 +4,10 @@
     "slug": "whatsapp",
     "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "https://www.canva.com/design/DAF3bgMpa4I/FzJUPN4jw41BTccz3HPI5w/edit?utm_content=DAF3bgMpa4I&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+    "icon": "./assets/Chatrr.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "https://www.canva.com/design/DAF3bgMpa4I/FzJUPN4jw41BTccz3HPI5w/edit?utm_content=DAF3bgMpa4I&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+      "image": "./assets/Chatrr.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
       "plugins": [

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
 import socketServcies from "../../Utils/SocketServices";
+import { useIsFocused } from "@react-navigation/native";
 
 const ChatList = () => {
 
@@ -13,6 +14,7 @@ const ChatList = () => {
   const [auth] = useAuth();
   const [chats, setChat] = useState([]);
   const [chat, setChats] = useState([]);
+  const isFocused = useIsFocused();
 
   const id = auth?.user?._id;
 
@@ -44,10 +46,12 @@ const ChatList = () => {
   };
 
   useEffect(() => {
-    getChats();
-  }, [id]);
+    if(isFocused){
+      getChats();
+    }
+  }, [isFocused]);
 
-  console.log(chat);
+  // console.log(chat[0]);
 
   return (
     <>
@@ -79,8 +83,9 @@ const ChatList = () => {
             {moment(items.item?.chat[0]?.updatedAt).fromNow()}
           </Text>
         </View>
+          <Text style={styles.subTitle} >{items.item?.chat[0]?.message}</Text>
+        
         <Text numberOfLines={2} style={styles.subTitle}>
-          {items.item?.chat[0]?.message}
         </Text>
       </View>
     </Pressable>

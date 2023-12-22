@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image , TextInput, Pressable, ToastAndroid} from "react-native";
+import { View, Text, StyleSheet, Image , TextInput, Pressable, ToastAndroid, ActivityIndicator} from "react-native";
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
@@ -13,6 +13,7 @@ const LoginScreen = () => {
 
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   //navigation
 
@@ -32,6 +33,7 @@ const LoginScreen = () => {
   const logIn = async () => {
 
     try {
+      setLoading(true);
       const {data} = await axios.post('http://192.168.161.47:6969/api/v1/users/login', {...value})
       console.log(data);
       if(data?.success){
@@ -49,9 +51,13 @@ const LoginScreen = () => {
         socket.on('connecion', (res) => {
           res.send(data.user._id);
         })
+
+        setLoading(false);
         
         AsyncStorage.setItem('auth', JSON.stringify(data));
+        setLoading(true);
         navigation.navigate('Home');
+        setLoading(false);
 
 
       } else {
@@ -59,6 +65,7 @@ const LoginScreen = () => {
       }
     } catch (error) {
       console.log(error.message);
+      setLoading(false);
     }
    }
 
@@ -66,7 +73,12 @@ const LoginScreen = () => {
 
   return (
     <>
-    <View style={{marginTop: 70}} >
+    {
+      loading === true ? (<View style={{ width: '100%', height: '100%', flexDirection: 'column', justifyContent: 'space-around'}} >
+        <ActivityIndicator aria-valuetext="Chatrr is Loading..." size={"large"} color={'royalblue'} style={{alignSelf: 'center'}} />
+      </View>)
+      : (
+        <View style={{marginTop: 70}} >
       <View style={styles.container}>
         <Image
           src="https://cdn-icons-png.flaticon.com/512/3032/3032932.png"
@@ -104,6 +116,8 @@ const LoginScreen = () => {
         </View>
       </View>
     </View>
+      )
+    }
     </>
   );
 };

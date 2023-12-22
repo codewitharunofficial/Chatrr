@@ -98,6 +98,7 @@ const ContactScreen = () => {
           }}
           data={users}
           renderItem={(items) => (
+            
             <Pressable
               onPress={ async () => {
                 try {
@@ -134,7 +135,8 @@ const ContactScreen = () => {
         />
       ) : null}
 
-      <Text style={{ fontWeight: "bold" }}>{contacts.length}</Text>
+      <Text style={{ fontWeight: "bold", alignSelf: 'center', justifyContent: 'center' }}> Total {contacts.length} contacts found </Text>
+      
       <FlatList
         style={{ width: "100%", padding: 20, marginTop: 50 }}
         data={contacts}

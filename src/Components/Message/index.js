@@ -1,34 +1,55 @@
-import { View, Text, StyleSheet } from 'react-native'
-import moment from 'moment'
+import { View, Text, StyleSheet } from "react-native";
+import moment from "moment";
+import { useAuth } from "../../Contexts/auth";
+import socketServcies from "../../Utils/SocketServices";
+import { useEffect, useState } from "react";
 
-
-const Message = ({message}) => {
-
+const Message = ({ message, receiver }) => {
+  const [auth] = useAuth();
+  
+  
   return (
-    <View style={[styles.container, {
-        backgroundColor: message.item.user.role === 'sender' ? '#DCF8C5' : 'white',
-        alignSelf: message.item.user.id === 'sender' ? 'flex-end' : 'flex-start',
-    }]}>
-      <Text>{message.item.text}</Text>
-      <Text style={styles.time}>{moment(message.item.createdAt).fromNow()}</Text>
+    
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            message.item.reciever === receiver &&
+            auth.user._id === message.item.sender
+              ? "#DCF8C5"
+              : "white",
 
+          alignSelf:
+            message.item.reciever === receiver &&
+            auth.user._id === message.item.sender
+              ? "flex-end"
+              : "flex-start",
+        },
+      ]}
+    >
+          
+              <Text>{message.item.message}</Text>
+
+      <Text style={styles.time}>
+        {moment(message.item.createdAt).fromNow()}
+      </Text>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
-     container: {
-        backgroundColor: 'white',
-        alignSelf: 'flex-start',
-        margin: 5,
-        padding: 10,
-        borderRadius: 5,
-        maxWidth: '80%',
-     },
-    time: {
-        color: 'green',
-        alignSelf: 'flex-end',
-    }
-})
+  container: {
+    alignSelf: "flex-start",
+    margin: 5,
+    padding: 10,
+    borderRadius: 5,
+    maxWidth: "80%",
+  },
+  time: {
+    color: "green",
+    alignSelf: "flex-end",
+  },
+});
 
-export default Message
+export default Message;

@@ -1,16 +1,21 @@
 import { View, Text, ImageBackground, StyleSheet, FlatList, } from 'react-native'
 import React, { useState } from 'react'
-import messages from '../../assets/WhatsApp - Asset Bundle/assets/data/messages.json'
 import Message from '../Components/Message';
 import InputBox from '../Components/Input/InputBox';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useEffect } from 'react';
+import axios from 'axios';
+import socketServcies from '../Utils/SocketServices';
+import { useIsFocused } from '@react-navigation/native';
 
-const Conversation = ({messages}) => {
+const Conversation = () => {
   
   const [reciever, setReciever] = useState('');
   const [convoId, setConvoId] = useState('');
   const [sender, setSender] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [chat, setChat] = useState([]);
+  const isFocused = useIsFocused();
 
   const route = useRoute();
   const navigation = useNavigation();
@@ -22,13 +27,44 @@ const Conversation = ({messages}) => {
 
 
 
+  useEffect(() => {
+    socketServcies.initializeSocket()
+  }, []);
+
+
+  useEffect(() => {
+    socketServcies.on('recieved-message', (msg) => {
+      let cloneArray = [...messages]
+      setChat(cloneArray.concat(msg.newMessage));
+      
+    })
+  }, []);
+
+
+
+  const fetchMessages = async () => {
+    try {
+      const {data} = await axios.post('http://192.168.161.47:6969/api/v1/messages/fetch-messages', {sender: sender, receiver: reciever});
+    setMessages(data.messages);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+    useEffect(() => {
+      if(isFocused){
+        fetchMessages();
+      }
+    }, [isFocused, chat]);
+
+
   return (
 
     <>
     <ImageBackground  src='https://img.freepik.com/premium-photo/concept-important-announcement-with-empty-speech-bubbles_185193-87043.jpg' style={styles.bg} >
       <FlatList
       data={messages}
-      renderItem={(item) => <Message message={item} />}
+      renderItem={(items) => <Message message={items} receiver={reciever} />}
       inverted
       style={styles.list}
       />
@@ -44,7 +80,8 @@ const styles = StyleSheet.create({
         flex: 1,
      },
      list: {
-      padding: 10
+      padding: 10,
+      marginVertical: 10
      }
 })
 
