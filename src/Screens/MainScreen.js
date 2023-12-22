@@ -9,19 +9,30 @@ const MainScreen = () => {
   const [auth] = useAuth();
   const [chats, setChats] = useState([]);
 
-  const getChats = async () => {
-      const {data} = axios.get(`http://192.168.161.47:6969/api/v1/messages/get-all-chats/${auth.user._id}`);
-      console.log(data);
-  }
+  const id = auth?.user?._id;
 
-  useEffect(() => {
-       getChats
-  }, [auth.user._id]);
+  const getChats = async () => {
+    try {
+      console.log(id)
+    const {data} = await axios.get(`http://192.168.161.47:6969/api/v1/messages/chats/${id}`);
+    // console.log(data);
+    if(data?.success === true) {
+      setChats(data);
+      console.log(data);
+    }
+    } catch (error) {
+      console.log(error.message);
+    }
+}
+
+useEffect(() => {
+     getChats();
+}, [id]);
 
   return (
     <FlatList
       data={chats}
-      renderItem={(item) => <ChatList chat={item} />}
+      renderItem={(items) => <ChatList chat={items} />}
       style={{backgroundColor: 'white'}}
     />
   );

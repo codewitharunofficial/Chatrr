@@ -6,6 +6,7 @@ import { Entypo, Ionicons } from '@expo/vector-icons';
 import ContactScreen from '../../Screens/ContactScreen';
 import SettingsScreen from '../../Screens/SettingsScreen';
 import UpdatesScreen from '../../Screens/UpdatesScreen';
+import ChatList from '../ChatListItems';
 
 const MainTabNavigation = () => {
 
@@ -19,7 +20,7 @@ const MainTabNavigation = () => {
         <Tab.Screen name='Contacts' component={ContactScreen} options={{tabBarIcon: ({ color, size}) => (
           <Ionicons name='call-outline' size={size} color={color} />
         )}} />
-        <Tab.Screen name='Chats' component={MainScreen} options={({navigation})=>({headerTitleAlign: 'center', tabBarIcon: ({color, size}) => (
+        <Tab.Screen name='Chats' component={ChatList} options={({navigation})=>({headerTitleAlign: 'center', tabBarIcon: ({color, size}) => (
           <Ionicons name='ios-chatbubbles-sharp' size={size} color={color} />
         ), headerRight: () => (
           <Entypo onPress={() => navigation.navigate('Contacts')} name='new-message' color={'royalblue'} size={24} style={{marginRight: 20}} />

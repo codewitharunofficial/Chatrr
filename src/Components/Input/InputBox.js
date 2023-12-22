@@ -9,17 +9,17 @@ import socketServcies from "../../Utils/SocketServices";
 import ChatList from "../ChatListItems";
 import Conversation from "../../Screens/Conversation";
 
-const InputBox = ({ reciever }) => {
+const InputBox = ({ reciever , convoId, sender}) => {
   const [input, setInput] = useState("");
   const [chat, setChat] = useState([]);
 
   const [auth] = useAuth();
 
   const qureies = {
-    reciever: reciever,
+    reciever: auth.user._id === reciever ? sender : reciever,
     sender: auth.user._id,
     message: input,
-    convoId : chat[0]?.convo?._id
+    convoId : convoId
   }
 
 
@@ -28,37 +28,34 @@ const InputBox = ({ reciever }) => {
   }, []);
 
 
-  useEffect(() => {
-    socketServcies.on('recieved-message', (msg) => {
-      let cloneArray = [...chat]
-      setChat(cloneArray.concat(msg));
-      console.log(chat[0].convo);
-      
+  const  sendMessage = async () => {
 
-      if(chat) {
-        <FlatList 
-        data={chat}
-        renderItem={(item) => <Conversation data={item} /> }
-        />
-      }
-    })
-  }, []);
-
-    const  sendMessage = async () => {
-
-         try {
-          if(!!input) {
-            socketServcies.emit('send-message', qureies);
-            setInput('');
-             return;
-            }
-            alert('Message Cannot me empty');
-          
-         } catch (error) {
-            console.log(error.message);
-         }
-
+    try {
+     if(!!input) {
+       socketServcies.emit('send-message', qureies);
+       setInput('');
+        return;
+       }
+       alert('Message Cannot me empty');
+     
+    } catch (error) {
+       console.log(error.message);
     }
+}
+
+
+
+  // useEffect(() => {
+  //   socketServcies.on('recieved-message', (msg) => {
+  //     let cloneArray = [...chat]
+  //     setChat(cloneArray.concat(msg));
+  //     if(chat.length > 0) {
+  //       return (
+  //         <FlatList data={chat} renderItem={(items) => <Conversation messages={items} /> } />
+  //       )
+  //     }
+  //   })
+  // }, []);
 
 
   return (

@@ -17,9 +17,10 @@ import { useAuth } from "../Contexts/auth";
 
 const ContactScreen = () => {
   const [contacts, setContacts] = useState([]);
-  const [receiver, setReceiver] = useState([]);
+  const [convoId, setConvoId] = useState('');
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
+
 
   const [auth] = useAuth();
 
@@ -98,19 +99,21 @@ const ContactScreen = () => {
           data={users}
           renderItem={(items) => (
             <Pressable
-              onPress={async () => {
+              onPress={ async () => {
                 try {
                   const { data } = await axios.post(
                     "http://192.168.161.47:6969/api/v1/messages/create-conversation",
                     { sender: auth.user._id, receiver: items.item._id }
                   );
-                  console.log(data);
+                  console.log(data.newConvo);
                   navigation.navigate("Conversation", {
-                    id: items.item._id,
                     name: items.item.name,
+                    receiver: items.item._id,
+                    sender: auth.user._id,
+                    id: data.newConvo,
                   });
                 } catch (error) {
-                  console.log(error);
+                  console.log(error.message);
                 }
               }}
               style={styles.container}

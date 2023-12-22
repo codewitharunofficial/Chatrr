@@ -6,17 +6,20 @@ import InputBox from '../Components/Input/InputBox';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useEffect } from 'react';
 
-const Conversation = () => {
+const Conversation = ({messages}) => {
   
   const [reciever, setReciever] = useState('');
+  const [convoId, setConvoId] = useState('');
+  const [sender, setSender] = useState('');
 
   const route = useRoute();
   const navigation = useNavigation();
 
 
   useEffect(() => {
-    navigation.setOptions({title: route.params.name}, setReciever(route.params.id));
+    navigation.setOptions({title: route.params.name}, setReciever(route.params.receiver), setConvoId(route.params.id), setSender(route.params.sender));
   }, [route.params.name]);
+
 
 
   return (
@@ -30,7 +33,7 @@ const Conversation = () => {
       style={styles.list}
       />
     </ImageBackground>
-      <InputBox reciever={reciever} />
+      <InputBox reciever={reciever} convoId={convoId} sender={sender} />
       </>
     
   )

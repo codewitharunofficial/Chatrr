@@ -13,11 +13,11 @@ class WSService {
             console.log("initializing socket", this.socket)
 
             this.socket.on('connect', (data) => {
-                console.log("=== socket connected ====")
+                // console.log("=== socket connected ====")
             })
 
             this.socket.on('disconnect', (data) => {
-                console.log("=== socket disconnected ====")
+                // console.log("=== socket disconnected ====")
             })
 
             this.socket.on('error', (data) => {
