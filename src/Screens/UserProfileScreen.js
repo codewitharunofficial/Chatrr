@@ -70,7 +70,7 @@ const SettingsScreen = () => {
            });
            
            
-           const {data} = await axios.post(`http://192.168.161.47:6969/api/v1/media/upload/${id}`, formdata, {
+           const {data} = await axios.post(`http://192.168.247.47:6969/api/v1/media/upload/${id}`, formdata, {
             headers:{
               Accept: 'application/json',
               'Content-Type': 'multipart/form-data'

@@ -6,7 +6,20 @@ import { useEffect, useState } from "react";
 
 const Message = ({ message, receiver }) => {
   const [auth] = useAuth();
+  const [chats, setChats] = useState([]);
   
+  useEffect(() => {
+    socketServcies.initializeSocket()
+  }, []);
+
+
+  useEffect(() => {
+    socketServcies.on('recieved-message', (msg) => {
+      let cloneArray = [...chats]
+      setChats(cloneArray.concat(msg));
+    })
+  }, []);
+
   
   return (
     

@@ -46,7 +46,7 @@ const ContactScreen = () => {
   const searchUser = async () => {
     try {
       const { data } = await axios.get(
-        `http://192.168.161.47:6969/api/v1/users/search-user/${search}`
+        `http://192.168.247.47:6969/api/v1/users/search-user/${search}`
       );
       setUsers(data?.searchedResults);
     } catch (error) {
@@ -103,7 +103,7 @@ const ContactScreen = () => {
               onPress={ async () => {
                 try {
                   const { data } = await axios.post(
-                    "http://192.168.161.47:6969/api/v1/messages/create-conversation",
+                    "http://192.168.247.47:6969/api/v1/messages/create-conversation",
                     { sender: auth.user._id, receiver: items.item._id }
                   );
                   console.log(data.newConvo);

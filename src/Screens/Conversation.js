@@ -27,6 +27,26 @@ const Conversation = () => {
 
 
 
+  const fetchMessages = async () => {
+
+    try {
+      const {data} = await axios.post('http://192.168.247.47:6969/api/v1/messages/fetch-messages', {sender, reciever});
+    setMessages(data.messages);
+    console.log(messages);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+    useEffect(() => {
+      if(isFocused){
+        fetchMessages();
+      }
+    }, [isFocused, chat, sender, reciever]);
+
+
+
+
   useEffect(() => {
     socketServcies.initializeSocket()
   }, []);
@@ -39,24 +59,7 @@ const Conversation = () => {
       
     })
   }, []);
-
-
-
-  const fetchMessages = async () => {
-    try {
-      const {data} = await axios.post('http://192.168.161.47:6969/api/v1/messages/fetch-messages', {sender: sender, receiver: reciever});
-    setMessages(data.messages);
-    } catch (error) {
-      console.log(error.message);
-    }
-  }
-
-    useEffect(() => {
-      if(isFocused){
-        fetchMessages();
-      }
-    }, [isFocused, chat]);
-
+  
 
   return (
 

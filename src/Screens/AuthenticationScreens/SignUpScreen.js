@@ -33,7 +33,7 @@ const SignUpScreen = () => {
 
      const signUp = async () => {
       try {
-        const {data} = await axios.post('http://192.168.161.47:6969/api/v1/users/create-user', {...value})
+        const {data} = await axios.post('http://192.168.247.47:6969/api/v1/users/create-user', {...value})
         if(data?.success){
           ToastAndroid.show(data?.message, ToastAndroid.TOP);
           setAuth({

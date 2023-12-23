@@ -34,7 +34,7 @@ const ChatList = () => {
   const getChats = async () => {
     try {
       const { data } = await axios.get(
-        `http://192.168.161.47:6969/api/v1/messages/chats/${id}`
+        `http://192.168.247.47:6969/api/v1/messages/chats/${id}`
       );
       // console.log(data);
       if (data?.success === true) {

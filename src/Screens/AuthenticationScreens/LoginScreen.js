@@ -34,7 +34,7 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      const {data} = await axios.post('http://192.168.161.47:6969/api/v1/users/login', {...value})
+      const {data} = await axios.post('http://192.168.247.47:6969/api/v1/users/login', {...value})
       console.log(data);
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
@@ -44,7 +44,7 @@ const LoginScreen = () => {
           token: data.token
         });
 
-        const socket = io('http://192.168.161.47:6969', {
+        const socket = io('http://192.168.247.47:6969', {
           reconnectionDelay: 3000
         })
 
