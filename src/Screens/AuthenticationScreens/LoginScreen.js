@@ -61,10 +61,11 @@ const LoginScreen = () => {
 
 
       } else {
-        ToastAndroid.show(data?.message , ToastAndroid.TOP);
+        alert(data.message);
       }
     } catch (error) {
       console.log(error.message);
+      alert(error.message)
       setLoading(false);
     }
    }
