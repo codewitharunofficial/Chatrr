@@ -14,15 +14,15 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { AntDesign } from "@expo/vector-icons";
 import { useAuth } from "../Contexts/auth";
+import ContactList from "../Components/ContactList";
 
 const ContactScreen = () => {
   const [contacts, setContacts] = useState([]);
   const [convoId, setConvoId] = useState('');
-  const [search, setSearch] = useState("");
-  const [users, setUsers] = useState([]);
-
 
   const [auth] = useAuth();
+  
+
 
   //navigate
   const navigation = useNavigation();
@@ -43,24 +43,10 @@ const ContactScreen = () => {
     getContacts();
   });
 
-  const searchUser = async () => {
-    try {
-      const { data } = await axios.get(
-        `http://192.168.247.47:6969/api/v1/users/search-user/${search}`
-      );
-      setUsers(data?.searchedResults);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    searchUser();
-  }, [search]);
-
+ 
   return (
     <>
-      <View
+      {/* <View
         style={{
           width: "100%",
           height: "10%",
@@ -103,7 +89,7 @@ const ContactScreen = () => {
               onPress={ async () => {
                 try {
                   const { data } = await axios.post(
-                    "http://192.168.247.47:6969/api/v1/messages/create-conversation",
+                    "https://android-chattr-app.onrender.com/api/v1/messages/create-conversation",
                     { sender: auth.user._id, receiver: items.item._id }
                   );
                   console.log(data.newConvo);
@@ -132,115 +118,20 @@ const ContactScreen = () => {
               </View>
             </Pressable>
           )}
-        />
-      ) : null}
+        /> */}
+      {/* ) : null}
 
-      <Text style={{ fontWeight: "bold", alignSelf: 'center', justifyContent: 'center' }}> Total {contacts.length} contacts found </Text>
+      <Text style={{ fontWeight: "bold", alignSelf: 'center', justifyContent: 'center' }}> Total {contacts.length} contacts found </Text> */}
       
       <FlatList
         style={{ width: "100%", padding: 20, marginTop: 50 }}
         data={contacts}
-        keyExtractor={(item) => item.id}
-        renderItem={(items) => (
-          <Pressable
-            onPress={() => {
-              navigation.navigate("Login", {
-                phone: items.item.phoneNumbers[0].number,
-                name: items.item.name,
-              });
-            }}
-            key={items.item.id}
-            style={{
-              flexDirection: "row",
-              marginHorizontal: 10,
-              marginVertical: 20,
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                borderBottomWidth: StyleSheet.hairlineWidth,
-                borderBottomColor: "lightgray",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                src={
-                  items.item.imageAvailable == true ? items.item.image.uri : ""
-                }
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 30,
-                  marginRight: 30,
-                  marginBottom: 10,
-                }}
-              />
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  marginBottom: 5,
-                }}
-              >
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: 18,
-                    flex: 1,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {items.item.name}
-                </Text>
-                <Text style={{ color: "grey" }}>
-                  {items.item.phoneNumbers &&
-                    items.item.phoneNumbers[0] &&
-                    items.item.phoneNumbers[0].number}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-        )}
+        renderItem={(items) =>  <ContactList contacts={items} /> }
       />
     </>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    marginHorizontal: 10,
-    marginVertical: 10,
-    borderBottomWidth: 1,
-  },
-  photo: {
-    width: 50,
-    height: 50,
-    borderRadius: 30,
-    marginRight: 10,
-  },
-  content: {
-    flex: 1,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "lightgray",
-  },
-  row: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  name: {
-    fontWeight: "bold",
-    fontSize: 20,
-    flex: 1,
-  },
-  subTitle: {
-    color: "grey",
-  },
-});
+
 
 export default ContactScreen;

@@ -9,6 +9,7 @@ import SettingsScreen from "../../Screens/SettingsScreen";
 import UserProfileScreen from "../../Screens/UserProfileScreen";
 import { useAuth } from "../../Contexts/auth";
 import UploadPhotoScreen from "../../Screens/AuthenticationScreens/UploadPhotoScreen";
+import UsersScreen from "../../Screens/AuthenticationScreens/UsersScreen";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -18,54 +19,91 @@ const Navigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        
-          
-      <Stack.Screen
-          name="SignUp"
-          component={SignUpScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
+        {auth.user?.token ? (
+          <>
+            <Stack.Screen
+              name="Home"
+              component={MainTabNavigation}
+              options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+              name="Conversation"
+              component={Conversation}
+              options={{ headerTitleAlign: "center" }}
+            />
+
+            <Stack.Screen
+              name="Contacts"
+              component={ContactScreen}
+              options={{ headerTitleAlign: "center" }}
+            />
+
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{ headerTitleAlign: "center" }}
+            />
+            <Stack.Screen
+              name="Profile"
+              component={UserProfileScreen}
+              options={{ headerTitleAlign: "center" }}
+            />
+          </>
+        ) : (
+          <>
+            <Stack.Screen
+              name="SignUp"
+              component={SignUpScreen}
+              options={{ headerShown: false }}
+            />
+            {/* <Stack.Screen
           name="Upload Photo"
           component={UploadPhotoScreen}
           options={{ headerShown: true }}
-        />
+        />  */}
 
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Home"
-          component={MainTabNavigation}
-          options={{ headerShown: false }}
-        />
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Home"
+              component={MainTabNavigation}
+              options={{ headerShown: false }}
+            />
 
-        <Stack.Screen
-          name="Conversation"
-          component={Conversation}
-          options={{ headerTitleAlign: "center" }}
-        />
+            <Stack.Screen
+              name="Users"
+              component={UsersScreen}
+              options={{ headerTitleAlign: "center" }}
+            />
 
-        <Stack.Screen
-          name="Contacts"
-          component={ContactScreen}
-          options={{ headerTitleAlign: "center" }}
-        />
+            <Stack.Screen
+              name="Conversation"
+              component={Conversation}
+              options={{ headerTitleAlign: "center" }}
+            />
 
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ headerTitleAlign: "center" }}
-        />
-        <Stack.Screen
-          name="Profile"
-          component={UserProfileScreen}
-          options={{ headerTitleAlign: "center" }}
-        />
-        
-        
+            <Stack.Screen
+              name="Contacts"
+              component={ContactScreen}
+              options={{ headerTitleAlign: "center" }}
+            />
+
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{ headerTitleAlign: "center" }}
+            />
+            <Stack.Screen
+              name="Profile"
+              component={UserProfileScreen}
+              options={{ headerTitleAlign: "center" }}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

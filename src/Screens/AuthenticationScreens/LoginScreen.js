@@ -34,7 +34,7 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      const {data} = await axios.post('http://192.168.247.47:6969/api/v1/users/login', {...value})
+      const {data} = await axios.post('https://android-chattr-app.onrender.com/api/v1/users/login', {...value})
       console.log(data);
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
@@ -44,7 +44,7 @@ const LoginScreen = () => {
           token: data.token
         });
 
-        const socket = io('http://192.168.247.47:6969', {
+        const socket = io('https://android-chattr-app.onrender.com', {
           reconnectionDelay: 3000
         })
 
@@ -61,11 +61,10 @@ const LoginScreen = () => {
 
 
       } else {
-        alert(data.message);
+        ToastAndroid.show(data?.message , ToastAndroid.TOP);
       }
     } catch (error) {
       console.log(error.message);
-      alert(error.message)
       setLoading(false);
     }
    }
@@ -79,6 +78,7 @@ const LoginScreen = () => {
         <ActivityIndicator aria-valuetext="Chatrr is Loading..." size={"large"} color={'royalblue'} style={{alignSelf: 'center'}} />
       </View>)
       : (
+        <View style={{width: '100%', height: '100%', backgroundColor: '#fff'}} >
         <View style={{marginTop: 70}} >
       <View style={styles.container}>
         <Image
@@ -116,6 +116,7 @@ const LoginScreen = () => {
           </Pressable>
         </View>
       </View>
+    </View>
     </View>
       )
     }

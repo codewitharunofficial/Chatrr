@@ -14,7 +14,7 @@ const MainScreen = () => {
   const getChats = async () => {
     try {
       console.log(id)
-    const {data} = await axios.get(`http://192.168.247.47:6969/api/v1/messages/chats/${id}`);
+    const {data} = await axios.get(`https://android-chattr-app.onrender.com/api/v1/messages/chats/${id}`);
     // console.log(data);
     if(data?.success === true) {
       setChats(data);

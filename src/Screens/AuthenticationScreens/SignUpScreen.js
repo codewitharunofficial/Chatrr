@@ -33,7 +33,7 @@ const SignUpScreen = () => {
 
      const signUp = async () => {
       try {
-        const {data} = await axios.post('http://192.168.247.47:6969/api/v1/users/create-user', {...value})
+        const {data} = await axios.post('https://android-chattr-app.onrender.com/api/v1/users/create-user', {...value})
         if(data?.success){
           ToastAndroid.show(data?.message, ToastAndroid.TOP);
           setAuth({
@@ -43,7 +43,7 @@ const SignUpScreen = () => {
           });
           
           AsyncStorage.setItem('auth', JSON.stringify(data));
-          navigation.navigate('Upload Photo');
+          navigation.navigate('Home');
         } else {
           ToastAndroid.show(data?.message, ToastAndroid.TOP);
         }

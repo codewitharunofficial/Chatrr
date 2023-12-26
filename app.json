@@ -40,8 +40,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/Chatrr.png",
+        "backgroundColor": "#000"
       },
       "permissions": [
         "CAMERA",

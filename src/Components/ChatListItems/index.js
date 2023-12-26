@@ -34,7 +34,7 @@ const ChatList = () => {
   const getChats = async () => {
     try {
       const { data } = await axios.get(
-        `http://192.168.247.47:6969/api/v1/messages/chats/${id}`
+        `https://android-chattr-app.onrender.com/api/v1/messages/chats/${id}`
       );
       // console.log(data);
       if (data?.success === true) {
@@ -71,7 +71,7 @@ const ChatList = () => {
       style={styles.container}
     >
       <Image
-        source={{uri: auth.user._id === items.item.senderId ? items.item.receiver.profilePhoto.url : items.item.sender.profilePhoto.url}}
+        src={auth.user._id === items.item.senderId ? items.item.receiver.profilePhoto.url : items.item.sender.profilePhoto.url}
         style={styles.photo}
       />
       <View style={styles.content}>

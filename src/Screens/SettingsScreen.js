@@ -1,17 +1,42 @@
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image, ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../Contexts/auth";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import io from 'socket.io-client'
+import { useIsFocused } from "@react-navigation/native";
+import axios from "axios";
 
 const SettingsScreen = () => {
   const [auth, setAuth] = useAuth();
   const [user, setUser] = useState([]);
+  const [userId, setUserId] = useState('');
+  const [profilePhoto, setProfilePhoto] = useState('');
+  const isFocused = useIsFocused();
 
   const navigation = useNavigation();
+
+  const getAdminDetails = async () => {
+    setUserId(auth.user._id);
+    try {
+      const {data} = await axios.get(`https://android-chattr-app.onrender.com/api/v1/users/get-user/${userId}`);
+    if(data.success === true) {
+      setProfilePhoto(data.user.profilePhoto.url);
+      setUser(data.user);
+    }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    if(isFocused) {
+      getAdminDetails();
+    }
+  }, [isFocused, userId]);
+
+ 
 
   const handlePress = async () => {
     setAuth({
@@ -26,10 +51,17 @@ const SettingsScreen = () => {
 
 
   return (
-    <View style={styles.container}>
+    <>
+    {
+      !user ? (
+        <View style={{ width: '100%', height: '100%', flexDirection: 'column', justifyContent: 'space-around'}} >
+        <ActivityIndicator aria-valuetext="Chatrr is Loading..." size={"large"} color={'royalblue'} style={{alignSelf: 'center'}} />
+      </View>
+      ) : (
+        <View style={styles.container}>
       <Pressable style={styles.pressable}>
         <Image
-          source={{uri: auth?.user?.photo?.url}}
+          source={{uri: profilePhoto}}
           height={60}
           width={60}
           style={{ borderRadius: 50 }}
@@ -42,9 +74,9 @@ const SettingsScreen = () => {
               fontWeight: "700",
             }}
           >
-            {auth?.user?.name}
+            {user?.name}
           </Text>
-          <Text>{auth?.user?.phone}</Text>
+          <Text>{user?.phone}</Text>
           
           </View>
         </View>
@@ -61,6 +93,9 @@ const SettingsScreen = () => {
         </Text>
       </Pressable>
     </View>
+      )
+    }
+    </>
   );
 };
 

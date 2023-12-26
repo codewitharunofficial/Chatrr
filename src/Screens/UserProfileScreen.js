@@ -1,5 +1,5 @@
-import { View, Text, Pressable, StyleSheet, Image, TextInput } from "react-native";
-import React, { useState } from "react";
+import { View, Text, Pressable, StyleSheet, Image, TextInput, ScrollView, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -16,31 +16,57 @@ import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
 import { PermissionsAndroid } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
+import { useIsFocused } from "@react-navigation/native";
+
 
 const SettingsScreen = () => {
   const [auth, setAuth] = useAuth();
 
   const navigation = useNavigation();
   const [id, setId] = useState('');
+  const isFocused = useIsFocused();
+  const [userId, setUserId] = useState('');
+  const [name, setName] = useState(admin?.name);
+  const [phone, setPhone] = useState(admin?.phone);
+  const [email, setEmail] = useState(admin?.email);
+  const [admin, setAdmin] = useState([]); 
+  const [loading, setLoading] = useState(false);
 
   const [photo, setPhoto] = useState('');
+  const [profilePhoto, setProfilePhoto] = useState('');
+
   const [editable, setEditable] = useState(false);
 
 
+  const getAdminDetails = async () => {
+    setUserId(auth.user._id);
+    try {
+      const {data} = await axios.get(`https://android-chattr-app.onrender.com/api/v1/users/get-user/${userId}`);
+    console.log(data);
+    if(data.success === true) {
+      setProfilePhoto(data.user.profilePhoto.url);
+      setName(data.user.name)
+      setPhone(data.user.phone);
+      setEmail(data.user.email);
+      setAdmin(data.user);
+    }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-  const handlePress = async () => {
-    setAuth({
-      ...auth,
-      user: null,
-      token: "",
-    });
-    AsyncStorage.clear();
-    Toast.show("Logged Out Successfully!");
-    navigation.navigate("Login");
-  };
+
+  useEffect(() => {
+    if(isFocused) {
+      getAdminDetails();
+    }
+  }, [isFocused, userId, profilePhoto]);
+  
+
 
   const uploadPhoto = async () => {
 
+    setId(auth.user._id);
       
     const granted = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -55,10 +81,8 @@ const SettingsScreen = () => {
     });
     
     setPhoto(res.assets[0].uri);
-    setId(auth.user._id);
 
           try {
-           
            const formdata = new FormData();
            if(!res) return
    
@@ -70,7 +94,7 @@ const SettingsScreen = () => {
            });
            
            
-           const {data} = await axios.post(`http://192.168.247.47:6969/api/v1/media/upload/${id}`, formdata, {
+           const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/media/upload/${id}`, formdata, {
             headers:{
               Accept: 'application/json',
               'Content-Type': 'multipart/form-data'
@@ -78,6 +102,7 @@ const SettingsScreen = () => {
            });
              
              if(data?.success === true){
+              setProfilePhoto(data.user.profilePhoto.url);
                 setAuth({
                   ...auth,
                   user: data.user,
@@ -94,10 +119,38 @@ const SettingsScreen = () => {
         }
   };
 
+
+  const updateUserDetails = async () => {
+       try {
+        
+        setUserId(auth.user._id);
+
+        const {data} = await axios.put(`https://android-chattr-app.onrender.com/api/v1/users/update-user/${userId}`, {name: name, phone: phone, email: email});
+        if(data.success === true) {
+          setName(data.user.name);
+          setPhone(data.user.phone);
+          setEmail(data.user.email);
+          setEditable(false);
+        } else{
+          alert(data.message)
+        }
+       } catch (error) {
+           console.log(error.message)
+           alert(error.message)
+       }
+  }
+
   
 
   return (
-    <View style={styles.container}>
+    <>
+    {
+      !admin ? (
+        <View style={{ width: '100%', height: '100%', flexDirection: 'column', justifyContent: 'space-around'}} >
+        <ActivityIndicator aria-valuetext="Chatrr is Loading..." size={"large"} color={'royalblue'} style={{alignSelf: 'center'}} />
+      </View>
+      ) : (
+        <View style={styles.container}>
       <View style={{ width: '40%', height: '20%', alignSelf: 'center', borderRadius:60, marginBottom: 20, marginTop: 30, borderBottomWidth: StyleSheet.hairlineWidth}} >
       <View
         style={{
@@ -110,8 +163,8 @@ const SettingsScreen = () => {
         }}
       >
         {
-          auth?.user?.photo?.url ? (
-            <Image source={{uri: auth?.user?.photo?.url}} style={{width: '100%', height: '100%'}} />
+          profilePhoto ? (
+            <Image source={{ uri: profilePhoto}} style={{width: '100%', height: '100%'}} />
           ) : photo ? (
             <Image source={{uri: photo}} style={{width: '100%', height: '100%'}} />
           ) : (
@@ -122,31 +175,46 @@ const SettingsScreen = () => {
         <MaterialIcons onPress={uploadPhoto} name="photo-camera" size={40} color='royalblue' 
         style={{ marginTop: -20, alignSelf: 'flex-end'}} />
         </View>
+        <ScrollView style={{padding: 10}} >
+        <View style={{width: '100%', height: '80%', marginTop: 10,}} >
+          <Pressable onPress={() => setEditable(true)} style={{alignSelf: 'flex-end', backgroundColor: 'lightgreen', padding: 10, borderRadius: 10}} >
+            <Text style={{fontSize: 16}} >Update <Feather name="edit" size={16} style={{alignSelf: 'center'}} /> </Text>
+          </Pressable>
         <View style={styles.pressable} >
           <Ionicons name="person" size={20} />
           <View style={{width: '90%', paddingHorizontal: 20,}} >
             <Text style={{fontSize: 16, fontWeight: '400', color: 'gray'}} >Name</Text>
-            <TextInput editable={editable} value={auth.user.name} style={{fontSize: 24, fontWeight: '400', color: 'black'}} />
-            <Feather name="edit" size={20} style={{alignSelf: 'flex-end', marginTop: '-10%'}} />
+            <TextInput onChangeText={setName} editable={editable} value={name}  style={{fontSize: 24, fontWeight: '400', color: 'black'}} />
           </View>
         </View>
         <View style={styles.pressable} >
           <Feather name="phone" size={20} />
           <View style={{width: '90%', paddingHorizontal: 20,}} >
             <Text style={{fontSize: 16, fontWeight: '400', color: 'gray'}} >Phone</Text>
-            <TextInput editable={editable} value={auth.user.phone} style={{fontSize: 24, fontWeight: '400', color: 'black'}} />
-            <Feather name="edit" size={20} style={{alignSelf: 'flex-end', marginTop: '-10%'}} />
+            <TextInput onChangeText={setPhone} editable={editable} value={ phone} style={{fontSize: 24, fontWeight: '400', color: 'black'}} />
+            
           </View>
         </View>
         <View style={styles.pressable} >
           <MaterialIcons name="email" size={20} />
           <View style={{width: '90%', paddingHorizontal: 20,}} >
             <Text style={{fontSize: 16, fontWeight: '400', color: 'gray'}} >Email</Text>
-            <TextInput editable={editable} value={auth.user.email} style={{fontSize: 16, fontWeight: '400', color: 'black'}} />
-            <Feather name="edit" size={20} style={{alignSelf: 'flex-end', marginTop: '-10%'}} />
+            <TextInput onChangeText={setEmail} editable={editable} value={email} style={{fontSize: 16, fontWeight: '400', color: 'black'}} />
           </View>
         </View>
     </View>
+    {
+      editable === true ? (
+        <Pressable onPress={updateUserDetails} style={{alignSelf: 'center', backgroundColor: '#00d4ff', padding: 10, borderRadius: 10, marginVertical: 10}} >
+      <Text>Save <MaterialCommunityIcons name="content-save-check-outline" size={20} /> </Text>
+    </Pressable>
+      ) : null
+    }
+    </ScrollView>
+    </View>
+      )
+    }
+    </>
   );
 };
 
@@ -175,10 +243,11 @@ const styles = StyleSheet.create({
   },
   pressable: {
     width: "100%",
-    height: "13%",
+    height: "auto",
     alignItems: "center",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    marginVertical: 10
   }
 });
 
