@@ -50,7 +50,7 @@ const UploadPhotoScreen = () => {
            
            console.log(formdata);
            
-           const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/media/upload/${id}`, formdata, {
+           const {data} = await axios.post(`http://192.168.82.47:6969/api/v1/media/upload/${id}`, formdata, {
             headers:{
               Accept: 'application/json',
               'Content-Type': 'multipart/form-data'
@@ -98,9 +98,9 @@ const UploadPhotoScreen = () => {
           marginTop: "-20%",
         }}
       >
-        {auth?.user?.photo?.url ? (
+        {auth?.user?.photo?.secure_url ? (
           <Image
-            source={{ uri: auth?.user?.photo?.url }}
+            source={{ uri: auth?.user?.photo?.secure_url }}
             style={{ width: "100%", height: "100%" }}
           />
         ) : photo ? (

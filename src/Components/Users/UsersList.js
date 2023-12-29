@@ -7,6 +7,7 @@ import axios from 'axios'
 const UsersList = ({ users }) => {
 
     const navigation = useNavigation();
+    const [auth] = useAuth();
 
 
 
@@ -15,7 +16,7 @@ const UsersList = ({ users }) => {
               onPress={ async () => {
                 try {
                   const { data } = await axios.post(
-                    "https://android-chattr-app.onrender.com/api/v1/messages/create-conversation",
+                    "http://192.168.82.47:6969/api/v1/messages/create-conversation",
                     { sender: auth.user._id, receiver: users.item._id }
                   );
                   console.log(data.newConvo);
@@ -32,8 +33,10 @@ const UsersList = ({ users }) => {
               style={styles.container}
             >
               <Image
-                source={{ uri: users?.item?.profilePhoto?.url }}
+                source={{ uri: users?.item?.profilePhoto?.secure_url, headers: {'Accept': 'image/*'} }}
                 style={styles.photo}
+                width={50}
+                height={50}
               />
               <View style={styles.content}>
                 <View style={styles.row}>
@@ -53,8 +56,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   photo: {
-    width: 50,
-    height: 50,
     borderRadius: 30,
     marginRight: 10,
   },

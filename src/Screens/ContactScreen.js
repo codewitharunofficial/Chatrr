@@ -89,7 +89,7 @@ const ContactScreen = () => {
               onPress={ async () => {
                 try {
                   const { data } = await axios.post(
-                    "https://android-chattr-app.onrender.com/api/v1/messages/create-conversation",
+                    "http://192.168.82.47:6969/api/v1/messages/create-conversation",
                     { sender: auth.user._id, receiver: items.item._id }
                   );
                   console.log(data.newConvo);
@@ -106,7 +106,7 @@ const ContactScreen = () => {
               style={styles.container}
             >
               <Image
-                source={{ uri: items?.item?.profilePhoto?.url }}
+                source={{ uri: items?.item?.profilePhoto?.secure_url }}
                 style={styles.photo}
               />
               <View style={styles.content}>
@@ -124,7 +124,7 @@ const ContactScreen = () => {
       <Text style={{ fontWeight: "bold", alignSelf: 'center', justifyContent: 'center' }}> Total {contacts.length} contacts found </Text> */}
       
       <FlatList
-        style={{ width: "100%", padding: 20, marginTop: 50 }}
+        style={{ width: "100%", padding: 20, marginTop: 0 }}
         data={contacts}
         renderItem={(items) =>  <ContactList contacts={items} /> }
       />

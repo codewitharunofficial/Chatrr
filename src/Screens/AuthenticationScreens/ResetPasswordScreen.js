@@ -1,19 +1,19 @@
-import { View, Text, StyleSheet, Image , TextInput, Pressable, ToastAndroid, ActivityIndicator} from "react-native";
+import { View, Text, StyleSheet, Image , TextInput, Pressable, ToastAndroid, ActivityIndicator, ScrollView} from "react-native";
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import {useAuth} from '../../Contexts/auth';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import io from 'socket.io-client';
-import socketServcies from "../../Utils/SocketServices";
 
 
-const LoginScreen = () => {
+const ResetPasswordScreen = () => {
 
   //states
 
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(false);
 
   //navigation
@@ -24,41 +24,26 @@ const LoginScreen = () => {
 
   const [auth, setAuth] = useAuth();
 
-  const value = {
-    phone, password
-  }
+  
 
 
 
 
-  const logIn = async () => {
+  const resetPassword = async () => {
 
     try {
       setLoading(true);
-      const {data} = await axios.post('http://192.168.82.47:6969/api/v1/users/login', {...value})
+      const {data} = await axios.put('http://192.168.82.47:6969/api/v1/users/reset-password', {phone: phone, answer: answer, password: password})
       console.log(data);
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
-        setAuth({
-          ...auth,
-          user: data.user,
-          token: data.token
-        });
-
-        socketServcies.initializeSocket();
-        socketServcies.emit('connected', data.user._id);
-
         setLoading(false);
-        
-        AsyncStorage.setItem('auth', JSON.stringify(data));
-        AsyncStorage.setItem('LoggedIn', JSON.stringify(true));
-        navigation.navigate('Home');
+        navigation.navigate('Login');
         setLoading(false);
-
 
       } else {
         ToastAndroid.show(data?.message , ToastAndroid.TOP);
-        navigation.navigate("LogIn");
+        navigation.navigate("Reset-Password");
       }
     } catch (error) {
       console.log(error.message);
@@ -90,41 +75,38 @@ const LoginScreen = () => {
         <View style={{width: '100%', height: '20%', alignItems: 'center'}} > 
         <Text
           style={{
-            marginTop: 20,
+            marginTop: 10,
             fontSize: 30,
             color: "white",
             fontWeight: "bold",
             textDecorationLine: "underline",
           }}
         >
-          Login
+          Reset-Password
         </Text>
         </View>
-        <View style={{width: '90%', height: 'auto', alignItems: 'center', alignSelf: 'center', justifyContent: 'center', gap: 25, paddingVertical: 12}} >
+          <ScrollView style={{height: '100%'}} >
+        <View style={{width: '90%', height: '100%', alignItems: 'center', alignSelf: 'center', justifyContent: 'center', gap: 25,}} >
         <TextInput onChangeText={setPhone} required placeholder="Enter You Phone Number" style={styles.input} />
-        <TextInput required onChangeText={setPassword} secureTextEntry={true} placeholder="Enter You Password" style={styles.input} />
+        <TextInput required onChangeText={setPassword} placeholder="Enter New Password" style={styles.input} />
+        <Text style={{color: 'black', fontWeight: 'bold', alignSelf: 'center', marginBottom: -10, marginTop: -10}} >Secuirty Question: Your First School Name? </Text>
+        <TextInput required onChangeText={setAnswer}  placeholder="Enter You Answer" style={styles.input} />
         </View>
-        <View style={{width: '90%', height: 'auto', alignSelf: 'center', alignItems: 'center', flexDirection: 'row', gap: 15, justifyContent: 'center'}} >
-          <Pressable onPress={logIn} style={styles.button} >
-            <Text>Login</Text>
+      </ScrollView>
+        <View style={{width: '90%', height: 'auto', alignSelf: 'center', alignItems: 'center', flexDirection: 'row', gap: 15, justifyContent: 'center', marginBottom: 70}} >
+          <Pressable onPress={resetPassword} style={[styles.button,]} >
+            <Text>Submit</Text>
           </Pressable>
           <Pressable style={styles.button} >
-            <Text onPress={() => navigation.navigate('SignUp')} >SignUp</Text>
+            <Text onPress={() => navigation.navigate('Login')} >Log In</Text>
           </Pressable>
-        </View>
-        <View style={{width: '90%', height: '30%', alignSelf: 'center', alignItems: 'center', flexDirection: 'row', gap: 15, justifyContent: 'space-evenly', marginTop: -30 }} >
-
-          <Text style={{color: '#fff', fontSize: 16}} >Forgot Password?</Text>
-          <Pressable style={[styles.button, {backgroundColor: 'lightgreen', height: '30%', width: 'auto', paddingHorizontal: 7 }]} >
-            <Text onPress={() => navigation.navigate('Reset-Password')} >Reset Password </Text>
-          </Pressable>
-
         </View>
       </View>
     </View>
     </View>
       )
     }
+    
     </>
   );
 };
@@ -155,7 +137,7 @@ const styles = StyleSheet.create({
   },
   authContainer: {
     width: "90%",
-    height: "65%",
+    height: "68%",
     backgroundColor: "royalblue",
     borderBottomLeftRadius: 20,
     alignSelf: "center",
@@ -182,4 +164,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default LoginScreen;
+export default ResetPasswordScreen;

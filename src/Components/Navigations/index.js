@@ -10,62 +10,61 @@ import UserProfileScreen from "../../Screens/UserProfileScreen";
 import { useAuth } from "../../Contexts/auth";
 import UploadPhotoScreen from "../../Screens/AuthenticationScreens/UploadPhotoScreen";
 import UsersScreen from "../../Screens/AuthenticationScreens/UsersScreen";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ResetPasswordScreen from "../../Screens/AuthenticationScreens/ResetPasswordScreen";
+import AccountSettingScreen from "../../Screens/AccountSettingScreen";
+
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
 
   const [auth] = useAuth();
 
+  const [isLogged, setIsLogged] = useState(false);
+
+  const keepMeLoggedIn = async () => {
+      try {
+        const data = await AsyncStorage.getItem('LoggedIn');
+      setIsLogged(data);
+      console.log(isLogged);
+      } catch (error) {
+        console.log(error)
+      }
+  }
+
+  useEffect(() => {
+    keepMeLoggedIn();
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {auth.user?.token ? (
-          <>
+
+        {
+          isLogged === true ? (
             <Stack.Screen
               name="Home"
               component={MainTabNavigation}
               options={{ headerShown: false }}
             />
-
+          ) : (
             <Stack.Screen
-              name="Conversation"
-              component={Conversation}
-              options={{ headerTitleAlign: "center" }}
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
             />
-
-            <Stack.Screen
-              name="Contacts"
-              component={ContactScreen}
-              options={{ headerTitleAlign: "center" }}
-            />
-
-            <Stack.Screen
-              name="Settings"
-              component={SettingsScreen}
-              options={{ headerTitleAlign: "center" }}
-            />
-            <Stack.Screen
-              name="Profile"
-              component={UserProfileScreen}
-              options={{ headerTitleAlign: "center" }}
-            />
-          </>
-        ) : (
-          <>
+          )
+        }
+            
             <Stack.Screen
               name="SignUp"
               component={SignUpScreen}
               options={{ headerShown: false }}
             />
-            {/* <Stack.Screen
-          name="Upload Photo"
-          component={UploadPhotoScreen}
-          options={{ headerShown: true }}
-        />  */}
-
             <Stack.Screen
-              name="Login"
-              component={LoginScreen}
+              name="Reset-Password"
+              component={ResetPasswordScreen}
               options={{ headerShown: false }}
             />
             <Stack.Screen
@@ -83,7 +82,7 @@ const Navigator = () => {
             <Stack.Screen
               name="Conversation"
               component={Conversation}
-              options={{ headerTitleAlign: "center" }}
+              options={{ headerTitleAlign: "center",}}
             />
 
             <Stack.Screen
@@ -102,8 +101,11 @@ const Navigator = () => {
               component={UserProfileScreen}
               options={{ headerTitleAlign: "center" }}
             />
-          </>
-        )}
+            <Stack.Screen
+              name="Account-Settings"
+              component={AccountSettingScreen}
+              options={{ headerTitleAlign: "left" }}
+            />
       </Stack.Navigator>
     </NavigationContainer>
   );

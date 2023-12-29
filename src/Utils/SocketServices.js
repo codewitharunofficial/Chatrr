@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 
-const SOCKET_URL = 'https://android-chattr-app.onrender.com'
+const SOCKET_URL = 'http://192.168.82.47:6969'
 
 class WSService {
 

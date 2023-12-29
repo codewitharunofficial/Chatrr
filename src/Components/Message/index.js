@@ -1,38 +1,90 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import moment from "moment";
 import { useAuth } from "../../Contexts/auth";
 import socketServcies from "../../Utils/SocketServices";
 import { useEffect, useState } from "react";
+import * as Haptics from "expo-haptics";
+import { MaterialIcons } from "@expo/vector-icons";
+import axios from "axios";
+import Toast from "react-native-simple-toast";
 
 const Message = ({ message, receiver }) => {
   const [auth] = useAuth();
-    
+
+  const [selected, setselected] = useState("");
+  const [deselect, setDeselect] = useState(false);
+
+  const deleteMessage = async () => {
+    try {
+      const { data } = await axios.delete(
+        `http://192.168.82.47:6969/api/v1/messages/delete-message/${selected}`
+      );
+
+      if (data.success === true) {
+        Toast.show(data.message);
+      } else {
+        Toast.show(data.message);
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   return (
-    
     <View
-      style={[
-        styles.container,
-        {
-          backgroundColor:
-            message.item.reciever === receiver &&
-            auth.user._id === message.item.sender
-              ? "#DCF8C5"
-              : "white",
-
-          alignSelf:
-            message.item.reciever === receiver &&
-            auth.user._id === message.item.sender
-              ? "flex-end"
-              : "flex-start",
-        },
-      ]}
+      style={{
+        backgroundColor: selected ? "lightgray" : deselect === true ? "" : "",
+        borderRadius: 10,
+        width: "100%",
+        flexDirection:
+          message.item.reciever === receiver &&
+          auth.user._id === message.item.sender
+            ? "row-reverse"
+            : "row",
+        justifyContent: "space-around",
+        paddingHorizontal: selected ? 8 : 0,
+      }}
     >
-          
-              <Text>{message.item.message}</Text>
+      <View style={{ width: "100%" }}>
+        <Pressable
+          onLongPress={() => {
+            setselected(message.item._id),
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          }}
+          onPress={() => (selected ? setDeselect(true) : null)}
+          style={[
+            styles.container,
+            {
+              backgroundColor:
+                message.item.reciever === receiver &&
+                auth.user._id === message.item.sender
+                  ? "#DCF8C5"
+                  : "white",
 
-      <Text style={styles.time}>
-        {moment(message.item.createdAt).fromNow()}
-      </Text>
+              alignSelf:
+                message.item.reciever === receiver &&
+                auth.user._id === message.item.sender
+                  ? "flex-end"
+                  : "flex-start",
+            },
+          ]}
+        >
+          <Text>{message.item.message}</Text>
+
+          <Text style={styles.time}>
+            {moment(message.item.createdAt).fromNow()}
+          </Text>
+        </Pressable>
+      </View>
+      {selected ? (
+        <MaterialIcons
+          onPress={deleteMessage}
+          name="delete"
+          size={30}
+          color={"royalblue"}
+          style={{ alignSelf: "center" }}
+        />
+      ) : null}
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, Image, TextInput, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, StyleSheet, TextInput, ScrollView, ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,6 +17,7 @@ import axios from "axios";
 import { PermissionsAndroid } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { useIsFocused } from "@react-navigation/native";
+import { Image } from "expo-image";
 
 
 const SettingsScreen = () => {
@@ -41,10 +42,9 @@ const SettingsScreen = () => {
   const getAdminDetails = async () => {
     setUserId(auth.user._id);
     try {
-      const {data} = await axios.get(`https://android-chattr-app.onrender.com/api/v1/users/get-user/${userId}`);
-    console.log(data);
+      const {data} = await axios.get(`http://192.168.82.47:6969/api/v1/users/get-user/${userId}`);
     if(data.success === true) {
-      setProfilePhoto(data.user.profilePhoto.url);
+      setProfilePhoto(data?.user?.profilePhoto?.secure_url);
       setName(data.user.name)
       setPhone(data.user.phone);
       setEmail(data.user.email);
@@ -94,7 +94,7 @@ const SettingsScreen = () => {
            });
            
            
-           const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/media/upload/${id}`, formdata, {
+           const {data} = await axios.post(`http://192.168.82.47:6969/api/v1/media/upload/${id}`, formdata, {
             headers:{
               Accept: 'application/json',
               'Content-Type': 'multipart/form-data'
@@ -102,7 +102,7 @@ const SettingsScreen = () => {
            });
              
              if(data?.success === true){
-              setProfilePhoto(data.user.profilePhoto.url);
+              setProfilePhoto(data?.user?.profilePhoto?.secure_url);
                 setAuth({
                   ...auth,
                   user: data.user,
@@ -125,7 +125,7 @@ const SettingsScreen = () => {
         
         setUserId(auth.user._id);
 
-        const {data} = await axios.put(`https://android-chattr-app.onrender.com/api/v1/users/update-user/${userId}`, {name: name, phone: phone, email: email});
+        const {data} = await axios.put(`http://192.168.82.47:6969/api/v1/users/update-user/${userId}`, {name: name, phone: phone, email: email});
         if(data.success === true) {
           setName(data.user.name);
           setPhone(data.user.phone);
@@ -135,7 +135,6 @@ const SettingsScreen = () => {
           alert(data.message)
         }
        } catch (error) {
-           console.log(error.message)
            alert(error.message)
        }
   }
@@ -164,16 +163,16 @@ const SettingsScreen = () => {
       >
         {
           profilePhoto ? (
-            <Image source={{ uri: profilePhoto}} style={{width: '100%', height: '100%'}} />
+            <Image source={profilePhoto} style={{width: 100, height: 100, borderRadius: 50}} />
           ) : photo ? (
-            <Image source={{uri: photo}} style={{width: '100%', height: '100%'}} />
+            <Image source={photo} style={{width: 100, height: 100, borderRadius: 50}} />
           ) : (
-            <FontAwesome name="user-circle" size={112} />
+            <FontAwesome name="user-circle" color={'lightgray'} size={112} />
           )
         }
       </View>
         <MaterialIcons onPress={uploadPhoto} name="photo-camera" size={40} color='royalblue' 
-        style={{ marginTop: -20, alignSelf: 'flex-end'}} />
+        style={{ marginTop: -40, alignSelf: 'flex-end', marginLeft: -15}} />
         </View>
         <ScrollView style={{padding: 10}} >
         <View style={{width: '100%', height: '80%', marginTop: 10,}} >

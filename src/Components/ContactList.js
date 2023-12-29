@@ -16,8 +16,6 @@ const ContactList = ({contacts}) => {
   
 
   return (
-   <>
-
     <Pressable
             key={contacts.item.id}
             style={{
@@ -73,7 +71,6 @@ const ContactList = ({contacts}) => {
               </View>
             </View>
           </Pressable>
-          </>
   )
 }
 

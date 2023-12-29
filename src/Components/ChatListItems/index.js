@@ -1,11 +1,15 @@
 import moment from "moment";
-import { Text, Pressable, Image, StyleSheet, View, FlatList } from "react-native";
+import { Text, Pressable, StyleSheet, View, FlatList, Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
 import socketServcies from "../../Utils/SocketServices";
 import { useIsFocused } from "@react-navigation/native";
+import {Image} from 'expo-image';
+import { RectButton, Swipeable } from "react-native-gesture-handler";
+import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import Toast from 'react-native-simple-toast';
 
 const ChatList = () => {
 
@@ -15,6 +19,7 @@ const ChatList = () => {
   const [chats, setChat] = useState([]);
   const [chat, setChats] = useState([]);
   const isFocused = useIsFocused();
+  const [convoId, setConvoId] = useState('');
 
   const id = auth?.user?._id;
 
@@ -31,10 +36,22 @@ const ChatList = () => {
     })
   }, []);
 
+  const handleSwipeLeft = async () => {
+
+    try {
+      const {data} = await axios.delete(`http://192.168.82.47:6969/api/v1/messages/delete-convo/${convoId}`);
+      console.log(data);
+      Toast.show(data?.message);
+      
+    } catch (error) {
+      
+    }
+  }
+
   const getChats = async () => {
     try {
       const { data } = await axios.get(
-        `https://android-chattr-app.onrender.com/api/v1/messages/chats/${id}`
+        `http://192.168.82.47:6969/api/v1/messages/chats/${id}`
       );
       // console.log(data);
       if (data?.success === true) {
@@ -49,16 +66,29 @@ const ChatList = () => {
     if(isFocused){
       getChats();
     }
-  }, [isFocused]);
+  }, [isFocused, chat, handleSwipeLeft]);
 
-  // console.log(chat[0]);
+  
 
   return (
     <>
     <FlatList
     data={chats}
     renderItem={(items) => (
-      
+      <Swipeable renderLeftActions={(progress, dragX) => {
+        const trans = dragX.interpolate({
+          inputRange: [0, 50, 100, 101],
+          outputRange: [-20, 0, 0, 1]
+        });
+        return (
+          <RectButton style={{justifyContent: 'center', paddingHorizontal: 30, alignItems: 'center', paddingBottom: 10, backgroundColor: 'red', }} onPress={() => {setConvoId(''); console.log(convoId)}} >
+            <Animated.Text style={{transform: [{translateX: trans}]}} >
+               <MaterialIcons onPress={handleSwipeLeft} name="delete" size={30} color={'white'} />
+            </Animated.Text>
+
+          </RectButton>
+        )
+      }} onSwipeableOpen={(left) => {setConvoId(items.item._id);}} onSwipeableClose={(right) => {setConvoId('');}} >
       <Pressable
       onPress={() =>
         navigate.navigate("Conversation", {
@@ -70,10 +100,18 @@ const ChatList = () => {
       }
       style={styles.container}
     >
-      <Image
-        src={auth.user._id === items.item.senderId ? items.item.receiver.profilePhoto.url : items.item.sender.profilePhoto.url}
+      {
+        !items?.item?.receiver?.profilePhoto?.secure_url || !items?.item?.sender?.profilePhoto?.secure_url ? (
+          <FontAwesome name="user-circle" color={"lightgray"} size={50} style={{marginRight:10}} />
+        ) : (
+          <Image
+        source ={{uri: auth.user._id === items.item.senderId ? items.item.receiver.profilePhoto?.secure_url : items.item.sender.profilePhoto?.secure_url}}
+
         style={styles.photo}
+
       />
+        )
+      }
       <View style={styles.content}>
         <View style={styles.row}>
           <Text numberOfLines={1} style={styles.name}>
@@ -89,6 +127,7 @@ const ChatList = () => {
         </Text>
       </View>
     </Pressable>
+    </Swipeable>
     )}
     />
          

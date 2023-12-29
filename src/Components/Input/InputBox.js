@@ -1,13 +1,10 @@
-import { View, TextInput, StyleSheet, FlatList } from "react-native";
+import { TextInput, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { io } from "socket.io-client";
-import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
 import socketServcies from "../../Utils/SocketServices";
-import ChatList from "../ChatListItems";
-import Conversation from "../../Screens/Conversation";
+
 
 const InputBox = ({ reciever , convoId, sender}) => {
   const [input, setInput] = useState("");

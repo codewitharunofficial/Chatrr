@@ -14,12 +14,13 @@ const MainTabNavigation = () => {
 
   return (
     <Tab.Navigator initialRouteName='Chats' screenOptions={{
-      tabBarStyle: {backgroundColor: 'whitesmoke'},
-      headerStyle: {backgroundColor: 'whitesmoke'}
+      tabBarStyle: {backgroundColor: 'lightblue'},
+      headerStyle: {backgroundColor: 'lightblue',},
+      headerStatusBarHeight: 10,
     }} >
         <Tab.Screen name='Contacts' component={ContactScreen} options={{tabBarIcon: ({ color, size}) => (
           <Ionicons name='call-outline' size={size} color={color} />
-        )}} />
+        ), headerTitleAlign: 'center'}} />
         <Tab.Screen name='Chats' component={ChatList} options={({navigation})=>({headerTitleAlign: 'center', tabBarIcon: ({color, size}) => (
           <Ionicons name='ios-chatbubbles-sharp' size={size} color={color} />
         ), headerRight: () => (
@@ -27,10 +28,10 @@ const MainTabNavigation = () => {
         )})} />
         <Tab.Screen name='Updates' component={UpdatesScreen} options={{tabBarIcon: ({ color, size}) => (
           <Ionicons name='camera-outline' size={size} color={color} />
-        )}} />
+        ), headerTitleAlign: 'center'}} />
         <Tab.Screen name='Settings' component={SettingsScreen} options={{tabBarIcon: ({ color, size}) => (
           <Ionicons name='settings-outline' size={size} color={color} />
-        )}} />
+        ), headerTitleAlign: 'center'}} />
     </Tab.Navigator>
   )
 }

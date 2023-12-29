@@ -43,7 +43,7 @@ const Conversation = () => {
   const fetchMessages = async () => {
     try {
       const { data } = await axios.post(
-        "https://android-chattr-app.onrender.com/api/v1/messages/fetch-messages",
+        "http://192.168.82.47:6969/api/v1/messages/fetch-messages",
         { sender, reciever }
       );
       setMessages(data.messages);
@@ -56,7 +56,7 @@ const Conversation = () => {
     if (isFocused) {
       fetchMessages();
     }
-  }, [sender, reciever]);
+  }, [sender, reciever, messages]);
 
   useEffect(() => {
     socketServcies.initializeSocket();
@@ -70,34 +70,40 @@ const Conversation = () => {
     });
   }, []);
 
-  console.log(newMessage.reciever);
 
   const getNotificationPermission = async () => {
     const {status} = await Notifications.requestPermissionsAsync({
       android: {},
     });
-     console.log(status);
 
     if(status === 'granted') {
       const token = await Notifications.getExpoPushTokenAsync();
       const expoPushToken = token.data;
       setPushToken(expoPushToken);
     }
+  };
 
     if(pushToken) {
       const sendPushNotification = async (pushToken, newMessage) => {
         await Notifications.scheduleNotificationAsync({
           content:{
             title: `New Message`,
-            body: newMessage.message
+            body: newMessage?.message
           },
           to: pushToken,
-          sound: "default"
+          sound: "default",
         });
+        console.log("Notification Been Pushed Successfully");
       }
+      useEffect(() => {
+        if(auth.user._id === newMessage.reciever){
+
+          sendPushNotification();
+        }
+      }, [pushToken, newMessage]);
     }
 
-  };
+
 
   useEffect(() => {
     if(newMessage.length > 0 && newMessage?.reciever === auth.user._id){
@@ -105,6 +111,9 @@ const Conversation = () => {
     }
   }, [newMessage.length, newMessage?.reciever === auth.user._id]);
 
+  
+
+  
   return (
     <>
       <ImageBackground
