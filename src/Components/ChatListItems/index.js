@@ -10,6 +10,7 @@ import {Image} from 'expo-image';
 import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import Toast from 'react-native-simple-toast';
+import { BackHandler } from "react-native";
 
 const ChatList = () => {
 
@@ -20,6 +21,7 @@ const ChatList = () => {
   const [chat, setChats] = useState([]);
   const isFocused = useIsFocused();
   const [convoId, setConvoId] = useState('');
+  const [messagesId, setMessagesId] = useState('');
 
   const id = auth?.user?._id;
 
@@ -36,22 +38,32 @@ const ChatList = () => {
     })
   }, []);
 
-  const handleSwipeLeft = async () => {
+  useEffect(() => {
+    const handleBackButton = () => true;
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return() => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    }
+  }, []);
 
+  const handleSwipeLeft = async () => {
     try {
-      const {data} = await axios.delete(`http://192.168.82.47:6969/api/v1/messages/delete-convo/${convoId}`);
+    const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/messages/delete-convo/${convoId}`, {
+            sender: id,
+            receiver: messagesId
+          });
       console.log(data);
       Toast.show(data?.message);
       
     } catch (error) {
-      
+      console.log(error);
     }
   }
 
   const getChats = async () => {
     try {
       const { data } = await axios.get(
-        `http://192.168.82.47:6969/api/v1/messages/chats/${id}`
+        `https://android-chattr-app.onrender.com/api/v1/messages/chats/${id}`
       );
       // console.log(data);
       if (data?.success === true) {
@@ -81,21 +93,21 @@ const ChatList = () => {
           outputRange: [-20, 0, 0, 1]
         });
         return (
-          <RectButton style={{justifyContent: 'center', paddingHorizontal: 30, alignItems: 'center', paddingBottom: 10, backgroundColor: 'red', }} onPress={() => {setConvoId(''); console.log(convoId)}} >
+          <RectButton style={{justifyContent: 'center', paddingHorizontal: 30, alignItems: 'center', paddingBottom: 10, backgroundColor: 'red', }} onPress={() => {setConvoId('');}} >
             <Animated.Text style={{transform: [{translateX: trans}]}} >
                <MaterialIcons onPress={handleSwipeLeft} name="delete" size={30} color={'white'} />
             </Animated.Text>
 
           </RectButton>
         )
-      }} onSwipeableOpen={(left) => {setConvoId(items.item._id);}} onSwipeableClose={(right) => {setConvoId('');}} >
+      }} onSwipeableOpen={(left) => {setConvoId(items.item._id); setMessagesId(auth.user._id === items.item.senderId ? items.item.receiverId : items.item.senderId)}} onSwipeableClose={(right) => {setConvoId('');}} >
       <Pressable
       onPress={() =>
         navigate.navigate("Conversation", {
           id: items.item._id,
           name: auth.user._id === items.item.senderId ? items.item?.receiver.name : items.item.sender.name,
-          receiver: auth.user._id === items.item.senderId ? items.item.receiver._id : items.item.sender._id,
-          sender: auth.user._id === items.item.senderId ? items.item.senderId : items.item.receiver._id
+          receiver: auth.user._id === items.item.senderId ? items.item.receiverId : items.item.senderId,
+          sender: auth.user._id === items.item.senderId ? items.item.senderId : items.item.receiverId
         })
       }
       style={styles.container}

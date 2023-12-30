@@ -4,11 +4,13 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../Contexts/auth";
 import socketServcies from "../../Utils/SocketServices";
+import { Audio } from "expo-av";
+import * as Haptics from 'expo-haptics'
 
-
-const InputBox = ({ reciever , convoId, sender}) => {
+const InputBox = ({ reciever, convoId, sender }) => {
   const [input, setInput] = useState("");
   const [chat, setChat] = useState([]);
+  const [sound, setSound] = React.useState();
 
   const [auth] = useAuth();
 
@@ -16,47 +18,57 @@ const InputBox = ({ reciever , convoId, sender}) => {
     reciever: auth.user._id === reciever ? sender : reciever,
     sender: auth.user._id,
     message: input,
-    convoId : convoId
-  }
-
+    convoId: convoId,
+  };
 
   useEffect(() => {
-    socketServcies.initializeSocket()
+    socketServcies.initializeSocket();
   }, []);
 
-
-  const  sendMessage = async () => {
-
+  const sendMessage = async () => {
     try {
-     if(!!input) {
-       socketServcies.emit('send-message', qureies);
-       setInput('');
+      if (!!input) {
+        socketServcies.emit("send-message", qureies);
+        setInput("");
         return;
-       }
-       alert('Message Cannot me empty');
-     
+      }
+      alert("Message Cannot me empty");
     } catch (error) {
-       console.log(error.message);
+      console.log(error.message);
     }
-}
+  };
 
 
+  async function startRecording() {
+    console.log("Starting Recording");
+         try {
+          await Audio.requestPermissionsAsync();
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: true,
+            playsInSilentModeIOS: true,
+            playThroughEarpieceAndroid: true
+          });
+          console.log("Starting Recording...");
+          const {recording} = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+          setSound(recording);
+         } catch (error) {
+           console.log("Failed to Start Recording", error);
+         }
+  }
 
-  // useEffect(() => {
-  //   socketServcies.on('recieved-message', (msg) => {
-  //     let cloneArray = [...chat]
-  //     setChat(cloneArray.concat(msg));
-  //     if(chat.length > 0) {
-  //       return (
-  //         <FlatList data={chat} renderItem={(items) => <Conversation messages={items} /> } />
-  //       )
-  //     }
-  //   })
-  // }, []);
+  async function stopRecording() {
+    setSound(undefined);
+    await sound.stopAndUnloadAsync();
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false
+    });
 
+    const uri = sound.getURI();
+    console.log('Recording Stopped and Stored at', uri);
+  }
 
   return (
-    <SafeAreaView edges={['bottom']} style={styles.container}>
+    <SafeAreaView edges={["bottom"]} style={styles.container}>
       <AntDesign name="plus" size={20} color={"white"} style={styles.plus} />
       <TextInput
         value={input}
@@ -65,47 +77,58 @@ const InputBox = ({ reciever , convoId, sender}) => {
         style={styles.text}
       />
 
-      <MaterialIcons
-        style={styles.send}
-        onPress={sendMessage}
-        name="send"
-        size={20}
-        color={"white"}
-      />
+      {input ? (
+        <MaterialIcons
+          style={styles.send}
+          onPress={sendMessage}
+          name="send"
+          size={20}
+          color={"white"}
+        />
+      ) : (
+        <MaterialIcons
+        onPressIn={() => {startRecording, Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}}
+        onPressOut={stopRecording}
+          style={styles.send}
+          name="keyboard-voice"
+          size={20}
+          color={"white"}
+        />
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    backgroundColor: 'whitesmoke',
+    flexDirection: "row",
+    backgroundColor: "whitesmoke",
     padding: 10,
   },
   text: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 50,
     padding: 10,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'lightgray',
+    borderColor: "lightgray",
   },
   plus: {
-    backgroundColor: 'royalblue',
+    backgroundColor: "royalblue",
     padding: 12,
     paddingHorizontal: 15,
     borderRadius: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginRight: 7,
   },
   send: {
-    backgroundColor: 'royalblue',
+    backgroundColor: "royalblue",
     padding: 12,
     paddingHorizontal: 15,
     borderRadius: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginLeft: 7,
-  }
+  },
 });
 
-export default InputBox
+export default InputBox;

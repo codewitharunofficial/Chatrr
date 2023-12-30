@@ -28,7 +28,7 @@ const SettingsScreen = () => {
     setUserId(auth.user._id);
     try {
       const { data } = await axios.get(
-        `http://192.168.82.47:6969/api/v1/users/get-user/${userId}`
+        `https://android-chattr-app.onrender.com/api/v1/users/get-user/${userId}`
       );
       if (data.success === true) {
         setProfilePhoto(data?.user?.profilePhoto?.secure_url);

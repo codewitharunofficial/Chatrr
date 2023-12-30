@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ResetPasswordScreen from "../../Screens/AuthenticationScreens/ResetPasswordScreen";
 import AccountSettingScreen from "../../Screens/AccountSettingScreen";
+import socketServcies from "../../Utils/SocketServices";
 
 
 const Navigator = () => {
@@ -36,6 +37,13 @@ const Navigator = () => {
   useEffect(() => {
     keepMeLoggedIn();
   }, []);
+  
+  useEffect(() => {
+     socketServcies.initializeSocket();
+     socketServcies.on('online-status', (data) => {
+         console.log(data);
+     })
+  }, [])
 
   return (
     <NavigationContainer>

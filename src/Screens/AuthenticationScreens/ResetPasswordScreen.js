@@ -33,7 +33,7 @@ const ResetPasswordScreen = () => {
 
     try {
       setLoading(true);
-      const {data} = await axios.put('http://192.168.82.47:6969/api/v1/users/reset-password', {phone: phone, answer: answer, password: password})
+      const {data} = await axios.put('https://android-chattr-app.onrender.com/api/v1/users/reset-password', {phone: phone, answer: answer, password: password})
       console.log(data);
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);

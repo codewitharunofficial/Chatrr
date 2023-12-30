@@ -89,7 +89,7 @@ const ContactScreen = () => {
               onPress={ async () => {
                 try {
                   const { data } = await axios.post(
-                    "http://192.168.82.47:6969/api/v1/messages/create-conversation",
+                    "https://android-chattr-app.onrender.com/api/v1/messages/create-conversation",
                     { sender: auth.user._id, receiver: items.item._id }
                   );
                   console.log(data.newConvo);

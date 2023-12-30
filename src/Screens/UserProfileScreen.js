@@ -42,7 +42,7 @@ const SettingsScreen = () => {
   const getAdminDetails = async () => {
     setUserId(auth.user._id);
     try {
-      const {data} = await axios.get(`http://192.168.82.47:6969/api/v1/users/get-user/${userId}`);
+      const {data} = await axios.get(`https://android-chattr-app.onrender.com/api/v1/users/get-user/${userId}`);
     if(data.success === true) {
       setProfilePhoto(data?.user?.profilePhoto?.secure_url);
       setName(data.user.name)
@@ -94,7 +94,7 @@ const SettingsScreen = () => {
            });
            
            
-           const {data} = await axios.post(`http://192.168.82.47:6969/api/v1/media/upload/${id}`, formdata, {
+           const {data} = await axios.post(`https://android-chattr-app.onrender.com/api/v1/media/upload/${id}`, formdata, {
             headers:{
               Accept: 'application/json',
               'Content-Type': 'multipart/form-data'
@@ -125,7 +125,7 @@ const SettingsScreen = () => {
         
         setUserId(auth.user._id);
 
-        const {data} = await axios.put(`http://192.168.82.47:6969/api/v1/users/update-user/${userId}`, {name: name, phone: phone, email: email});
+        const {data} = await axios.put(`https://android-chattr-app.onrender.com/api/v1/users/update-user/${userId}`, {name: name, phone: phone, email: email});
         if(data.success === true) {
           setName(data.user.name);
           setPhone(data.user.phone);
@@ -150,7 +150,7 @@ const SettingsScreen = () => {
       </View>
       ) : (
         <View style={styles.container}>
-      <View style={{ width: '40%', height: '20%', alignSelf: 'center', borderRadius:60, marginBottom: 20, marginTop: 30, borderBottomWidth: StyleSheet.hairlineWidth}} >
+      <View style={{ width: '40%', height: '20%', alignSelf: 'center', borderRadius:60, marginBottom: 20, marginTop: 30,}} >
       <View
         style={{
           width: "100%",

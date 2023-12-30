@@ -17,7 +17,7 @@ const Message = ({ message, receiver }) => {
   const deleteMessage = async () => {
     try {
       const { data } = await axios.delete(
-        `http://192.168.82.47:6969/api/v1/messages/delete-message/${selected}`
+        `https://android-chattr-app.onrender.com/api/v1/messages/delete-message/${selected}`
       );
 
       if (data.success === true) {
