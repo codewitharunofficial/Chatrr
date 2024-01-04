@@ -1,4 +1,4 @@
-import { TextInput, StyleSheet } from "react-native";
+import { TextInput, StyleSheet, Text, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,11 +6,14 @@ import { useAuth } from "../../Contexts/auth";
 import socketServcies from "../../Utils/SocketServices";
 import { Audio } from "expo-av";
 import * as Haptics from 'expo-haptics'
+import axios from "axios";
 
 const InputBox = ({ reciever, convoId, sender }) => {
   const [input, setInput] = useState("");
   const [chat, setChat] = useState([]);
-  const [sound, setSound] = React.useState();
+  const [recording, setRecording] = React.useState();
+  const [uri,  setUri] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
 
   const [auth] = useAuth();
 
@@ -50,33 +53,61 @@ const InputBox = ({ reciever, convoId, sender }) => {
           });
           console.log("Starting Recording...");
           const {recording} = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-          setSound(recording);
+          setRecording(recording);
          } catch (error) {
            console.log("Failed to Start Recording", error);
          }
   }
 
   async function stopRecording() {
-    setSound(undefined);
-    await sound.stopAndUnloadAsync();
+    setRecording(undefined);
+    await recording.stopAndUnloadAsync();
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: false
     });
 
-    const uri = sound.getURI();
+    const uri = recording.getURI();
     console.log('Recording Stopped and Stored at', uri);
+    if(uri) {
+      setUri(uri);
+    }
+
+
+      try {
+
+        const formData = new FormData();
+      if(!uri) return
+
+      formData.append('audio', {
+        name: new Date() + '_voice',
+        uri: uri,
+        type: 'audio/m4a'
+      });
+      formData.append('sender', sender)
+      formData.append('receiver', reciever)
+        const {data} = await axios.post('http://192.168.82.47:6969/api/v1/media/send-voice', formData, {
+          headers:{
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        console.log(data);
+      } catch (error) {
+        console.log(error.message);
+      }
   }
 
   return (
     <SafeAreaView edges={["bottom"]} style={styles.container}>
       <AntDesign name="plus" size={20} color={"white"} style={styles.plus} />
       <TextInput
+      keyboardAppearance="dark"
         value={input}
         onChangeText={setInput}
         placeholder="Type Here..."
         style={styles.text}
       />
-
+    <Pressable style={{flexDirection: 'column-reverse', justifyContent: 'center', alignItems: 'center'}} >
       {input ? (
         <MaterialIcons
           style={styles.send}
@@ -87,14 +118,19 @@ const InputBox = ({ reciever, convoId, sender }) => {
         />
       ) : (
         <MaterialIcons
-        onPressIn={() => {startRecording, Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}}
-        onPressOut={stopRecording}
+        onLongPress={() => {startRecording(), Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), setIsRecording(true)}}
+        onPressOut={() => {stopRecording(), setIsRecording(false)}}
           style={styles.send}
           name="keyboard-voice"
-          size={20}
+          size={recording ? 24 : 20}
           color={"white"}
         />
       )}
+      {
+          isRecording ? (<Text>Recording...</Text>) : (null)
+
+        }
+        </Pressable>
     </SafeAreaView>
   );
 };

@@ -6,18 +6,10 @@ import { AntDesign } from '@expo/vector-icons';
 
 const ContactList = ({contacts}) => {
 
-  const navigation = useNavigation();
-  const [search, setSearch] = useState("");
-  
-
-
-
-
-  
 
   return (
     <Pressable
-            key={contacts.item.id}
+            key={contacts.item.index}
             style={{
               flexDirection: "row",
               marginHorizontal: 10,

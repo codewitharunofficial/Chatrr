@@ -15,7 +15,7 @@ const UsersScreen = () => {
     const searchUser = async () => {
         try {
           const { data } = await axios.get(
-            `https://android-chattr-app.onrender.com/api/v1/users/search-user/${search}`
+            `http://192.168.82.47:6969/api/v1/users/search-user/${search}`
           );
           setUsers(data?.searchedResults);
         } catch (error) {

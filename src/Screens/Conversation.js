@@ -1,10 +1,7 @@
 import {
-  View,
-  Text,
   ImageBackground,
   StyleSheet,
   FlatList,
-  Button,
 } from "react-native";
 import React, { useState } from "react";
 import Message from "../Components/Message";
@@ -16,6 +13,7 @@ import socketServcies from "../Utils/SocketServices";
 import { useIsFocused } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import { useAuth } from "../Contexts/auth";
+import Modal from "../Components/Modal/Modal";
 
 const Conversation = () => {
   const [reciever, setReciever] = useState("");
@@ -24,9 +22,10 @@ const Conversation = () => {
   const [messages, setMessages] = useState([]);
   const [chat, setChat] = useState([]);
   const isFocused = useIsFocused();
-  const [newMessage, setNewMessage] = useState({});
+  const [newMessage, setNewMessage] = useState([]);
   const [auth] = useAuth();
   const [pushToken, setPushToken] = useState([]);
+  const [visible, setVisible] = useState(true);
 
   const route = useRoute();
   const navigation = useNavigation();
@@ -43,7 +42,7 @@ const Conversation = () => {
   const fetchMessages = async () => {
     try {
       const { data } = await axios.post(
-        "https://android-chattr-app.onrender.com/api/v1/messages/fetch-messages",
+        "http://192.168.82.47:6969/api/v1/messages/fetch-messages",
         { sender, reciever }
       );
       setMessages(data.messages);
@@ -66,10 +65,11 @@ const Conversation = () => {
     socketServcies.on("recieved-message", (msg) => {
       let cloneArray = [...messages];
       setChat(cloneArray.concat(msg.messages));
-      setNewMessage(msg.newMessage);
+      let cloneArray2 = [...newMessage];
+      setNewMessage(cloneArray2.concat(msg.newMessage));
     });
   }, []);
-
+  
 
   const getNotificationPermission = async () => {
     const {status} = await Notifications.requestPermissionsAsync({
@@ -83,42 +83,42 @@ const Conversation = () => {
     }
   };
 
-    if(pushToken) {
-      const sendPushNotification = async (pushToken, newMessage) => {
-        try {
-          await Notifications.scheduleNotificationAsync({
-            content:{
-              title: `New Message`,
-              body: newMessage?.message
-            },
-            trigger: null
-          });
-          console.log("Notification Been Pushed Successfully");
-        } catch (error) {
-          console.log(error.message);
-        }
-      }
-      useEffect(() => {
-        if(auth.user._id === newMessage.reciever){
+    // if(pushToken) {
+    //   const sendPushNotification = async (pushToken, newMessage) => {
+    //     try {
+    //       await Notifications.scheduleNotificationAsync({
+    //         content:{
+    //           title: `New Message`,
+    //           body: newMessage?.message
+    //         },
+    //         trigger: null
+    //       });
+    //       console.log("Notification Been Pushed Successfully");
+    //     } catch (error) {
+    //       console.log(error.message);
+    //     }
+    //   }
+    //   useEffect(() => {
+    //     if(auth.user?._id === newMessage.reciever){
 
-          sendPushNotification();
-        }
-      }, [pushToken, newMessage]);
-    }
+    //       sendPushNotification();
+    //     }
+    //   }, [pushToken, newMessage]);
+    // }
 
 
 
   useEffect(() => {
-    if(newMessage.length > 0 && newMessage?.reciever === auth.user._id){
+    if(newMessage.length > 0 && newMessage?.reciever === auth.user?._id){
       getNotificationPermission();
     }
-  }, [newMessage.length, newMessage?.reciever === auth.user._id]);
+  }, [newMessage.length, newMessage?.reciever === auth.user?._id]);
 
   
   return (
     <>
       <ImageBackground
-        src="https://img.freepik.com/premium-photo/concept-important-announcement-with-empty-speech-bubbles_185193-87043.jpg"
+        src=""
         style={styles.bg}
       >
         <FlatList
@@ -138,6 +138,7 @@ const Conversation = () => {
 const styles = StyleSheet.create({
   bg: {
     flex: 1,
+    backgroundColor: 'lightgray'
   },
   list: {
     padding: 10,

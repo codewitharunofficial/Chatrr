@@ -1,3 +1,3 @@
 import axios from "axios";
 
-export default axios.create({ baseURL: 'https://android-chattr-app.onrender.com' });
+export default axios.create({ baseURL: 'http://192.168.82.47:6969' });

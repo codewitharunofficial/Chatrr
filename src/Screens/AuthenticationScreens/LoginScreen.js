@@ -35,8 +35,7 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      const {data} = await axios.post('https://android-chattr-app.onrender.com/api/v1/users/login', {...value})
-      console.log(data);
+      const {data} = await axios.post('http://192.168.82.47:6969/api/v1/users/login', {...value})
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
         setAuth({
@@ -45,15 +44,15 @@ const LoginScreen = () => {
           token: data.token
         });
         setLoading(false);
-        
         AsyncStorage.setItem('auth', JSON.stringify(data));
         AsyncStorage.setItem('LoggedIn', JSON.stringify(true));
         navigation.navigate('Home');
-        setLoading(false);
 
 
       } else {
+        setLoading(true)
         ToastAndroid.show(data?.message , ToastAndroid.TOP);
+        setLoading(false);
         navigation.navigate("Login");
       }
     } catch (error) {
@@ -97,8 +96,8 @@ const LoginScreen = () => {
         </Text>
         </View>
         <View style={{width: '90%', height: 'auto', alignItems: 'center', alignSelf: 'center', justifyContent: 'center', gap: 25, paddingVertical: 12}} >
-        <TextInput onChangeText={setPhone} required placeholder="Enter You Phone Number" style={styles.input} />
-        <TextInput required onChangeText={setPassword} secureTextEntry={true} placeholder="Enter You Password" style={styles.input} />
+        <TextInput onChangeText={setPhone} required placeholder="Enter Your Phone Number" style={styles.input} />
+        <TextInput required onChangeText={setPassword} secureTextEntry={true} placeholder="Enter Your Password" style={styles.input} />
         </View>
         <View style={{width: '90%', height: 'auto', alignSelf: 'center', alignItems: 'center', flexDirection: 'row', gap: 15, justifyContent: 'center'}} >
           <Pressable onPress={logIn} style={styles.button} >

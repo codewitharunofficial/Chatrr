@@ -25,10 +25,10 @@ const SettingsScreen = () => {
   const navigation = useNavigation();
 
   const getAdminDetails = async () => {
-    setUserId(auth.user._id);
+    setUserId(auth.user?._id);
     try {
       const { data } = await axios.get(
-        `https://android-chattr-app.onrender.com/api/v1/users/get-user/${userId}`
+        `http://192.168.82.47:6969/api/v1/users/get-user/${userId}`
       );
       if (data.success === true) {
         setProfilePhoto(data?.user?.profilePhoto?.secure_url);
@@ -51,8 +51,7 @@ const SettingsScreen = () => {
       user: null,
       token: "",
     });
-    AsyncStorage.removeItem("auth");
-    AsyncStorage.removeItem("LoggedIn");
+    AsyncStorage.clear();
     Toast.show("Logged Out Successfully!");
     navigation.navigate("Login");
   };

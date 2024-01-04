@@ -11,23 +11,26 @@ import {
 import { useEffect, useState } from "react";
 import socketServcies from "./src/Utils/SocketServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ChatList from "./src/Components/ChatListItems";
+import LoginScreen from "./src/Screens/AuthenticationScreens/LoginScreen";
 
 export default function App() {
 
-  // const [user, setUser] = useState([]);
-     
+  // const [isLogged, setIsLogged] = useState(false);
+
   // const keepMeLoggedIn = async () => {
-  //        setUser(auth?.user)
-  //   const {data} = await AsyncStorage.getItem("LoggedIn");
-  //   if(data === true) {
-  //     socketServcies.initializeSocket();
-  //     socketServcies.emit("connected",);
-  //   }
+  //     try {
+  //       const data = await AsyncStorage.getItem('LoggedIn');
+  //     setIsLogged(data);
+  //     } catch (error) {
+  //       console.log(error)
+  //     }
   // }
 
   // useEffect(() => {
   //   keepMeLoggedIn();
   // }, []);
+
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
