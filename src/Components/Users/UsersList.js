@@ -16,7 +16,7 @@ const UsersList = ({ users }) => {
               onPress={ async () => {
                 try {
                   const { data } = await axios.post(
-                    "http://192.168.82.47:6969/api/v1/messages/create-conversation",
+                    `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/create-conversation`,
                     { sender: auth.user._id, receiver: users.item._id }
                   );
                   console.log(data.newConvo);

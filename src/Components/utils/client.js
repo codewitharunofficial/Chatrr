@@ -1,3 +1,3 @@
 import axios from "axios";
 
-export default axios.create({ baseURL: 'http://192.168.82.47:6969' });
+export default axios.create({ baseURL: '${process.env.EXPO_PUBLIC_BASE_URL}' });

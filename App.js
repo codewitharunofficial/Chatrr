@@ -1,18 +1,12 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Navigator from "./src/Components/Navigations";
-import { AuthProvider, useAuth } from "./src/Contexts/auth";
+import { AuthProvider } from "./src/Contexts/auth";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "react-native-gesture-handler";
 import {
   GestureHandlerRootView,
-  PanGestureHandler,
 } from "react-native-gesture-handler";
-import { useEffect, useState } from "react";
-import socketServcies from "./src/Utils/SocketServices";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import ChatList from "./src/Components/ChatListItems";
-import LoginScreen from "./src/Screens/AuthenticationScreens/LoginScreen";
 
 export default function App() {
 

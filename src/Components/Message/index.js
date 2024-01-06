@@ -8,6 +8,8 @@ import axios from "axios";
 import Toast from "react-native-simple-toast";
 import { Audio } from "expo-av";
 import * as FileSystem from 'expo-file-system';
+import * as Permissions from 'expo-permissions';
+import * as MediaLibrary from 'expo-media-library';
 const Message = ({ message, receiver }) => {
   const [auth] = useAuth();
 
@@ -19,29 +21,40 @@ const Message = ({ message, receiver }) => {
   const [canPlay, setCanPlay] = useState(true);
   const [loading, setLoading] = useState(false);
   const [uri, setUri] = useState('');
+  const [downloaded, setDownloaded] = useState(false);
+  const [filename, setFilename] = useState('');
 
 
   async function downloadAudio() {
-    const fileName = 'voice.m4a';
-    const result = await FileSystem.downloadAsync(url, FileSystem.documentDirectory + fileName); 
+    console.log(url);
+    const fileName = `${filename}.m4a`;
+    const result = await FileSystem.downloadAsync(url, FileSystem.documentDirectory + fileName, {
+      headers: {
+        'Content-Type': 'video/mp4'
+      }
+    }); 
     console.log(result);
     setUri(result.uri);
-    saveFile(result.uri, fileName, result.headers["Content-Type"]);
+    setDownloaded(true);
+    saveFile(result.uri, fileName, result.headers['Content-Type']);
   };
 
   async function saveFile(uri, fileName, mimetype) {
-        if(Platform.OS === 'android') {
-          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-          if(permissions.granted) {
-            const base64 = await FileSystem.readAsStringAsync(uri, {encoding: FileSystem.EncodingType.Base64});
+        const permissions = await MediaLibrary.requestPermissionsAsync();
+        if(permissions.status != 'granted'){
+          return;
+        }
 
-            await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, mimetype).then(async(uri) => {
-              await FileSystem.writeAsStringAsync(uri, base64, {encoding: FileSystem.EncodingType.Base64});
-            })
-            .catch(e => {
-              console.log(e)
-            })
+        try {
+          const assest = await MediaLibrary.createAssetAsync(uri);
+          const album = await MediaLibrary.getAlbumAsync('Chatrr');
+          if(album == null){
+            await MediaLibrary.createAlbumAsync('Chatrr', assest, false);
+          } else{
+            await MediaLibrary.addAssetsToAlbumAsync([assest], album, false);
           }
+        } catch (error) {
+          console.log(error)
         }
   }
 
@@ -49,8 +62,15 @@ const Message = ({ message, receiver }) => {
   const playAudio = async () => {
     try {
       const loadAudio = async () => {
+
+     const album = await MediaLibrary.getAlbumAsync('Chatrr');
+     if(album) {
+         const file = await MediaLibrary.getAssetInfoAsync(`${filename}.m4a`);
+         console.log(file);
+     }
+
         const { sound } = await Audio.Sound.createAsync(
-          { uri: url },
+          { uri: uri },
           { shouldPlay: true }
         );
         setSound(sound);
@@ -87,7 +107,7 @@ const Message = ({ message, receiver }) => {
   const deleteMessage = async () => {
     try {
       const { data } = await axios.delete(
-        `http://192.168.82.47:6969/api/v1/messages/delete-message/${selected}`
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/delete-message/${selected}`
       );
 
       if (data.success === true) {
@@ -99,6 +119,8 @@ const Message = ({ message, receiver }) => {
       alert(error.message);
     }
   };
+
+  
 
   return (
     <View
@@ -128,8 +150,8 @@ const Message = ({ message, receiver }) => {
               backgroundColor:
                 message.item.reciever === receiver &&
                 auth.user._id === message.item.sender
-                  ? "purple"
-                  : "#000",
+                  ? "#8f2fd0"
+                  : "#353637",
 
               alignSelf:
                 message.item.reciever === receiver &&
@@ -151,23 +173,26 @@ const Message = ({ message, receiver }) => {
             </Text>
           ) : (
             <Pressable style={{ minWidth: "50%", flexDirection: 'row' }}>
-              {canPlay === false ? (
-                <AntDesign
-                  name="pause"
-                  size={20}
-                  color={"white"}
-                  onPress={pause}
-                />
-              ) : (
-                <AntDesign
-                  name="play"
-                  size={20}
-                  color={"white"}
-                  onPress={() => {
-                    setUrl(message.item.message?.secure_url), downloadAudio();
-                  }}
-                />
-              )}
+              {
+                downloaded ? (
+                  canPlay ? 
+                    (<AntDesign
+                      name="play"
+                      size={20}
+                      color={"white"}
+                      onPress={() => {setFilename(message.item.message.original_filename),playAudio();}}
+                    />) : (
+                      <AntDesign
+                      name="pause"
+                      size={20}
+                      color={"white"}
+                      onPress={() => {pause()}}
+                    />
+                    )
+                ) : (
+                  <MaterialCommunityIcons onPress={() => {setUrl(message.item.message?.secure_url), setFilename(message.item.message.original_filename), downloadAudio()}} name="download" size={20} color={'white'} /> 
+                )
+              }
              <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
              <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
              <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
@@ -180,6 +205,9 @@ const Message = ({ message, receiver }) => {
           <Text style={styles.time}>
             {moment(message.item.createdAt).format("hh:mm")}
           </Text>
+          {
+            auth.user._id === message.item.sender && message.index === 0 && message.item.message?.read === false ? (<Text style={{alignSelf: 'flex-end', color: 'lightgreen'}} >Seen</Text>) : null
+          }
         </Pressable>
       </View>
       {selected ? (

@@ -1,6 +1,5 @@
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ContactScreen from "../../Screens/ContactScreen";
 import Conversation from "../../Screens/Conversation";
 import MainTabNavigation from "./MainTabNavigation";
 import LoginScreen from "../../Screens/AuthenticationScreens/LoginScreen";
@@ -8,34 +7,32 @@ import SignUpScreen from "../../Screens/AuthenticationScreens/SignUpScreen";
 import SettingsScreen from "../../Screens/SettingsScreen";
 import UserProfileScreen from "../../Screens/UserProfileScreen";
 import { useAuth } from "../../Contexts/auth";
-import UploadPhotoScreen from "../../Screens/AuthenticationScreens/UploadPhotoScreen";
 import UsersScreen from "../../Screens/AuthenticationScreens/UsersScreen";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ResetPasswordScreen from "../../Screens/AuthenticationScreens/ResetPasswordScreen";
 import AccountSettingScreen from "../../Screens/AccountSettingScreen";
-import socketServcies from "../../Utils/SocketServices";
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
 
-  const [auth, setAuth] = useAuth();
   const [isLogged, setIsLogged] = useState(false);
-  const [authRef, setAuthRef] = useState([]);
 
   const keepMeLoggedIn = async () => {
     const data = await AsyncStorage.getItem("LoggedIn");
     setIsLogged(JSON.parse(data));
+
+    if (isLogged) {
+      console.log("Yes You are Logged");
+    }
   };
 
   useEffect(() => {
     keepMeLoggedIn();
   }, []);
 
-  // console.log(isLogged);
-
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName={isLogged === true ? "Home" : "Login"}>
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -46,15 +43,16 @@ const Navigator = () => {
           component={SignUpScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="Home"
-          component={MainTabNavigation}
-          options={{ headerShown: false }}
-        />
 
         <Stack.Screen
           name="Reset-Password"
           component={ResetPasswordScreen}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Home"
+          component={MainTabNavigation}
           options={{ headerShown: false }}
         />
 

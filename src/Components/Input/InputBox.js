@@ -20,7 +20,7 @@ const InputBox = ({ reciever, convoId, sender }) => {
   const qureies = {
     reciever: auth.user._id === reciever ? sender : reciever,
     sender: auth.user._id,
-    message: input,
+    message: input ? input : uri,
     convoId: convoId,
   };
 
@@ -85,13 +85,13 @@ const InputBox = ({ reciever, convoId, sender }) => {
       });
       formData.append('sender', sender)
       formData.append('receiver', reciever)
-        const {data} = await axios.post('http://192.168.82.47:6969/api/v1/media/send-voice', formData, {
+        const {data} = await axios.post(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/media/send-voice`, formData, {
           headers:{
             Accept: 'application/json',
             'Content-Type': 'multipart/form-data'
           }
         });
-        console.log(data);
+        // console.log(data);
       } catch (error) {
         console.log(error.message);
       }

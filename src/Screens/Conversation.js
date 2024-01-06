@@ -42,7 +42,7 @@ const Conversation = () => {
   const fetchMessages = async () => {
     try {
       const { data } = await axios.post(
-        "http://192.168.82.47:6969/api/v1/messages/fetch-messages",
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/fetch-messages`,
         { sender, reciever }
       );
       setMessages(data.messages);
@@ -138,7 +138,7 @@ const Conversation = () => {
 const styles = StyleSheet.create({
   bg: {
     flex: 1,
-    backgroundColor: 'lightgray'
+    backgroundColor: 'white'
   },
   list: {
     padding: 10,

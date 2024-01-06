@@ -42,7 +42,7 @@ const SettingsScreen = () => {
   const getAdminDetails = async () => {
     setUserId(auth?.user?._id);
     try {
-      const {data} = await axios.get(`http://192.168.82.47:6969/api/v1/users/get-user/${userId}`);
+      const {data} = await axios.get(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/get-user/${userId}`);
     if(data.success === true) {
       setProfilePhoto(data?.user?.profilePhoto?.secure_url);
       setName(data.user.name)
@@ -93,7 +93,7 @@ const SettingsScreen = () => {
            });
            
            
-           const {data} = await axios.post(`http://192.168.82.47:6969/api/v1/media/upload/${id}`, formdata, {
+           const {data} = await axios.post(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/media/upload/${id}`, formdata, {
             headers:{
               Accept: 'application/json',
               'Content-Type': 'multipart/form-data'
@@ -124,7 +124,7 @@ const SettingsScreen = () => {
         
         setUserId(auth.user?._id);
 
-        const {data} = await axios.put(`http://192.168.82.47:6969/api/v1/users/update-user/${userId}`, {name: name, phone: phone, email: email});
+        const {data} = await axios.put(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/update-user/${userId}`, {name: name, phone: phone, email: email});
         if(data.success === true) {
           setName(data.user.name);
           setPhone(data.user.phone);

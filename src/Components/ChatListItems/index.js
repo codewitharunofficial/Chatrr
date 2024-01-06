@@ -16,7 +16,7 @@ import socketServcies from "../../Utils/SocketServices";
 import { useIsFocused } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
-import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import Toast from "react-native-simple-toast";
 import { BackHandler } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -30,6 +30,7 @@ const ChatList = () => {
   const isFocused = useIsFocused();
   const [convoId, setConvoId] = useState("");
   const [messagesId, setMessagesId] = useState("");
+  const [lastMessage, setLastMessage] = useState({});
 
   const [user, setUser] = useState([]);
 
@@ -57,7 +58,7 @@ const ChatList = () => {
   const handleSwipeLeft = async () => {
     try {
       const { data } = await axios.post(
-        `http://192.168.82.47:6969/api/v1/messages/delete-convo/${convoId}`,
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/delete-convo/${convoId}`,
         {
           sender: id,
           receiver: messagesId,
@@ -73,7 +74,7 @@ const ChatList = () => {
   const getChats = async () => {
     try {
       const { data } = await axios.get(
-        `http://192.168.82.47:6969/api/v1/messages/chats/${id}`
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/chats/${id}`
       );
       // console.log(data);
       if (data?.success === true) {
@@ -90,7 +91,14 @@ const ChatList = () => {
     }
   }, [isFocused, chat, handleSwipeLeft]);
 
-  //  console.log(chat);
+  const setMessagesAsRead = async () => {
+    try {
+      const {data} = await axios.post(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/read-message/${convoId}`, {lastMessage: lastMessage});
+    console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <>
@@ -140,7 +148,7 @@ const ChatList = () => {
             }}
           >
             <Pressable
-              onPress={() =>
+              onPress={() =>{
                 navigate.navigate("Conversation", {
                   id: items.item._id,
                   name:
@@ -155,7 +163,7 @@ const ChatList = () => {
                     auth.user._id === items.item.senderId
                       ? items.item.senderId
                       : items.item.receiverId,
-                })
+                }), setConvoId(items.item._id), setLastMessage(items.item?.chat[items.item.chat.length -1]?.message), (auth.user._id === items.item.receiverId) ? setMessagesAsRead() : null}
               }
               style={styles.container}
             >
@@ -186,13 +194,28 @@ const ChatList = () => {
                       : items.item.sender.name}
                   </Text>
                   <Text numberOfLines={1} style={styles.subTitle}>
-                    {moment(items.item?.chat[0]?.updatedAt).fromNow()}
+                    {moment(items.item?.chat[items.item.chat.length -1]?.updatedAt).fromNow()}
                   </Text>
                 </View>
+                <View style={{flexDirection: 'row', gap: 10, width: '100%', justifyContent: 'space-between'}} > 
                 <Text style={styles.subTitle}>
-                  {items.item?.chat[0]?.message.message}
+                  {items.item?.chat[items.item.chat.length -1]?.message?.message ? items.item?.chat[items.item.chat.length -1]?.message?.message : auth.user._id === items.item.senderId ? ('You Sent An Attachment') : (`${items.item.sender.name} Sent you An Attachment`)}
                 </Text>
+                {
+                  !items.item.chat[items.item.chat.length -1]?.message?.message ? (<Entypo style={{marginLeft: -60, marginTop: 3}} name="attachment" size={16} color={'purple'} />) : null
+                }
 
+                {
+                  items.item?.read === false && auth.user._id === items.item.receiverId ? (
+                    <>
+                    <View style={{width: 20, height: 20,  backgroundColor: 'purple', borderRadius: 20, alignItems: 'center', justifyContent: 'center'}} >
+                  <Text style={{color: 'white'}} >{items.item.chat?.length -1}</Text>
+                  </View>
+                  </>
+                  ) : null
+                }
+                
+               </View>
                 <Text numberOfLines={2} style={styles.subTitle}></Text>
               </View>
             </Pressable>

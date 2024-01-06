@@ -35,7 +35,7 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      const {data} = await axios.post('http://192.168.82.47:6969/api/v1/users/login', {...value})
+      const {data} = await axios.post(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/login`, {...value})
       if(data?.success){
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
         setAuth({
