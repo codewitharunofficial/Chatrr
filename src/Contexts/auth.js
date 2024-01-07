@@ -7,21 +7,26 @@ const AuthContext = createContext();
 const AuthProvider = ({children})=>{
     const [auth, setAuth] = useState({
         user: null,
-        token: ''
         
     });
-
-    axios.defaults.headers.common["Authorization"]= auth?.token;
-
     useEffect(() => {
-      const data = AsyncStorage.getItem('auth');
-      if(data){
-        setAuth({
-            ...auth,
-            user: data.user,
-            token: data.token
-        });
-      }
+        const getUser = async () => {
+
+            const token = await AsyncStorage.getItem('token');
+
+            axios.defaults.headers.common["Authorization"] = token
+
+            const res = await AsyncStorage.getItem('auth');
+            const user = JSON.parse(res);
+            if(user) {
+                setAuth({
+                    ...auth,
+                    user: user.user,
+                })
+        }
+            
+        }
+        getUser();
     //eslint-disable-next-line
     }, []);
     

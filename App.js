@@ -7,38 +7,50 @@ import "react-native-gesture-handler";
 import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+import ChatList from "./src/Components/ChatListItems";
+import LoginScreen from "./src/Screens/AuthenticationScreens/LoginScreen";
 
 export default function App() {
 
-  // const [isLogged, setIsLogged] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+  const [token, setToken] = useState('');
 
-  // const keepMeLoggedIn = async () => {
-  //     try {
-  //       const data = await AsyncStorage.getItem('LoggedIn');
-  //     setIsLogged(data);
-  //     } catch (error) {
-  //       console.log(error)
-  //     }
-  // }
+  const keepMeLoggedIn = async () => {
+      try {
+        const data = await AsyncStorage.getItem('LoggedIn');
+      setIsLogged(JSON.parse(data));
+      const token = await AsyncStorage.getItem('token');
+      setToken(token);
+      } catch (error) {
+        console.log(error)
+      }
+  }
 
-  // useEffect(() => {
-  //   keepMeLoggedIn();
-  // }, []);
-
+  useEffect(() => {
+    keepMeLoggedIn();
+  }, []);
+  
+  // console.log(token);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.container}>
-              <Navigator />
               <StatusBar style="auto" animated={true} />
+              <Navigator>
+               {
+                isLogged === true ? <ChatList /> : <LoginScreen />
+               }
+              </Navigator>
             </View>
           </SafeAreaView>
         </SafeAreaProvider>
-      </AuthProvider>
     </GestureHandlerRootView>
+      </AuthProvider>
   );
 }
 

@@ -1,8 +1,4 @@
-import {
-  ImageBackground,
-  StyleSheet,
-  FlatList,
-} from "react-native";
+import { ImageBackground, StyleSheet, FlatList } from "react-native";
 import React, { useState } from "react";
 import Message from "../Components/Message";
 import InputBox from "../Components/Input/InputBox";
@@ -25,7 +21,7 @@ const Conversation = () => {
   const [newMessage, setNewMessage] = useState([]);
   const [auth] = useAuth();
   const [pushToken, setPushToken] = useState([]);
-  const [visible, setVisible] = useState(true);
+  const [read, setRead] = useState(false);
 
   const route = useRoute();
   const navigation = useNavigation();
@@ -35,7 +31,8 @@ const Conversation = () => {
       { title: route.params.name },
       setReciever(route.params.receiver),
       setConvoId(route.params.id),
-      setSender(route.params.sender)
+      setSender(route.params.sender),
+      setRead(route.params.read)
     );
   }, [route.params.name]);
 
@@ -65,66 +62,71 @@ const Conversation = () => {
     socketServcies.on("recieved-message", (msg) => {
       let cloneArray = [...messages];
       setChat(cloneArray.concat(msg.messages));
-      let cloneArray2 = [...newMessage];
-      setNewMessage(cloneArray2.concat(msg.newMessage));
+      setNewMessage(msg.newMessage);
     });
   }, []);
-  
+
+  //marking messages as seen
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: true,
+      shouldShowAlert: true,
+      shouldSetBadge: true
+    }),
+  });
 
   const getNotificationPermission = async () => {
-    const {status} = await Notifications.requestPermissionsAsync({
+    const { status } = await Notifications.requestPermissionsAsync({
       android: {},
     });
 
-    if(status === 'granted') {
+    if (status === "granted") {
       const token = await Notifications.getExpoPushTokenAsync();
       const expoPushToken = token.data;
       setPushToken(expoPushToken);
     }
   };
 
-    // if(pushToken) {
-    //   const sendPushNotification = async (pushToken, newMessage) => {
-    //     try {
-    //       await Notifications.scheduleNotificationAsync({
-    //         content:{
-    //           title: `New Message`,
-    //           body: newMessage?.message
-    //         },
-    //         trigger: null
-    //       });
-    //       console.log("Notification Been Pushed Successfully");
-    //     } catch (error) {
-    //       console.log(error.message);
-    //     }
-    //   }
-    //   useEffect(() => {
-    //     if(auth.user?._id === newMessage.reciever){
-
-    //       sendPushNotification();
-    //     }
-    //   }, [pushToken, newMessage]);
-    // }
-
+  if (pushToken) {
+    const sendPushNotification = async () => {
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `New Message`,
+            body: newMessage.message ? newMessage.message.message : 'Unread Message from Arun',
+            priority: Notifications.AndroidNotificationPriority,
+            sound: true,
+            vibrate: 2
+          },
+          trigger: null,
+        });
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    useEffect(() => {
+      if(newMessage?.message && newMessage.message.reciever === auth.user._id){
+        sendPushNotification();
+      }
+    }, [newMessage?.message]);
+  }
 
 
   useEffect(() => {
-    if(newMessage.length > 0 && newMessage?.reciever === auth.user?._id){
+    if(newMessage?.message){
       getNotificationPermission();
     }
-  }, [newMessage.length, newMessage?.reciever === auth.user?._id]);
+  }, [newMessage?.message]);
 
-  
+
   return (
     <>
-      <ImageBackground
-        src=""
-        style={styles.bg}
-      >
+      <ImageBackground src="" style={styles.bg}>
         <FlatList
           data={chat.length > 0 ? chat : messages}
           renderItem={(items) => (
-            <Message message={items} receiver={reciever} />
+            <Message message={items} receiver={reciever} read={{read}} />
           )}
           inverted
           style={styles.list}
@@ -138,7 +140,7 @@ const Conversation = () => {
 const styles = StyleSheet.create({
   bg: {
     flex: 1,
-    backgroundColor: 'white'
+    backgroundColor: "white",
   },
   list: {
     padding: 10,

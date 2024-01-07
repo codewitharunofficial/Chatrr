@@ -20,11 +20,9 @@ const Navigator = () => {
   const keepMeLoggedIn = async () => {
     const data = await AsyncStorage.getItem("LoggedIn");
     setIsLogged(JSON.parse(data));
-
-    if (isLogged) {
-      console.log("Yes You are Logged");
-    }
   };
+
+  console.log(isLogged);
 
   useEffect(() => {
     keepMeLoggedIn();
@@ -32,7 +30,7 @@ const Navigator = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={isLogged === true ? "Home" : "Login"}>
+      <Stack.Navigator initialRouteName={!!isLogged ? "Login" : "Home"} >
         <Stack.Screen
           name="Login"
           component={LoginScreen}

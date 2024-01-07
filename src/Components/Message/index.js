@@ -10,7 +10,7 @@ import { Audio } from "expo-av";
 import * as FileSystem from 'expo-file-system';
 import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from 'expo-media-library';
-const Message = ({ message, receiver }) => {
+const Message = ({ message, receiver, read }) => {
   const [auth] = useAuth();
 
   const [selected, setselected] = useState("");
@@ -44,7 +44,6 @@ const Message = ({ message, receiver }) => {
         if(permissions.status != 'granted'){
           return;
         }
-
         try {
           const assest = await MediaLibrary.createAssetAsync(uri);
           const album = await MediaLibrary.getAlbumAsync('Chatrr');
@@ -119,8 +118,6 @@ const Message = ({ message, receiver }) => {
       alert(error.message);
     }
   };
-
-  
 
   return (
     <View
@@ -205,10 +202,10 @@ const Message = ({ message, receiver }) => {
           <Text style={styles.time}>
             {moment(message.item.createdAt).format("hh:mm")}
           </Text>
-          {
-            auth.user._id === message.item.sender && message.index === 0 && message.item.message?.read === false ? (<Text style={{alignSelf: 'flex-end', color: 'lightgreen'}} >Seen</Text>) : null
-          }
         </Pressable>
+        {
+            auth.user._id === message.item.sender && message.index === 0 && read.read === true ? (<Text style={{alignSelf: 'flex-end', color: 'black', fontSize: 10, marginRight: 10}} >Seen</Text>) : null
+          }
       </View>
       {selected ? (
         <MaterialIcons

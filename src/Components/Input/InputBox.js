@@ -106,6 +106,7 @@ const InputBox = ({ reciever, convoId, sender }) => {
         onChangeText={setInput}
         placeholder="Type Here..."
         style={styles.text}
+        multiline={true}
       />
     <Pressable style={{flexDirection: 'column-reverse', justifyContent: 'center', alignItems: 'center'}} >
       {input ? (
@@ -145,9 +146,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     borderRadius: 50,
-    padding: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "lightgray",
+    maxHeight: 80
   },
   plus: {
     backgroundColor: "royalblue",

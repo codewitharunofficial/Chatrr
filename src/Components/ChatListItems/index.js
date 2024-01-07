@@ -32,7 +32,7 @@ const ChatList = () => {
   const [messagesId, setMessagesId] = useState("");
   const [lastMessage, setLastMessage] = useState({});
 
-  const [user, setUser] = useState([]);
+  const [read, setRead] = useState(false);
 
   const id = auth?.user?._id;
 
@@ -95,6 +95,9 @@ const ChatList = () => {
     try {
       const {data} = await axios.post(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/read-message/${convoId}`, {lastMessage: lastMessage});
     console.log(data);
+    if(data.success) {
+       setRead(true);
+    }
     } catch (error) {
       console.log(error);
     }
@@ -163,7 +166,8 @@ const ChatList = () => {
                     auth.user._id === items.item.senderId
                       ? items.item.senderId
                       : items.item.receiverId,
-                }), setConvoId(items.item._id), setLastMessage(items.item?.chat[items.item.chat.length -1]?.message), (auth.user._id === items.item.receiverId) ? setMessagesAsRead() : null}
+                  read: read
+                }), setConvoId(items.item._id), setLastMessage(items.item?.chat[items.item.chat.length -1]), auth.user._id === items.item.receiverId ? setMessagesAsRead() : null}
               }
               style={styles.container}
             >
@@ -194,22 +198,22 @@ const ChatList = () => {
                       : items.item.sender.name}
                   </Text>
                   <Text numberOfLines={1} style={styles.subTitle}>
-                    {moment(items.item?.chat[items.item.chat.length -1]?.updatedAt).fromNow()}
+                    {moment(items.item?.chat[items.item.chat.length -1].createdAt).fromNow()}
                   </Text>
                 </View>
                 <View style={{flexDirection: 'row', gap: 10, width: '100%', justifyContent: 'space-between'}} > 
                 <Text style={styles.subTitle}>
-                  {items.item?.chat[items.item.chat.length -1]?.message?.message ? items.item?.chat[items.item.chat.length -1]?.message?.message : auth.user._id === items.item.senderId ? ('You Sent An Attachment') : (`${items.item.sender.name} Sent you An Attachment`)}
+                  {items.item?.chat[items.item.chat.length -1]?.message?.message ? items.item?.chat[items.item.chat.length -1]?.message?.message : auth.user?._id === items.item.senderId ? ('You Sent An Attachment') : (`${items.item.sender.name} Sent you An Attachment`)}
                 </Text>
                 {
                   !items.item.chat[items.item.chat.length -1]?.message?.message ? (<Entypo style={{marginLeft: -60, marginTop: 3}} name="attachment" size={16} color={'purple'} />) : null
                 }
 
                 {
-                  items.item?.read === false && auth.user._id === items.item.receiverId ? (
+                  items.item?.read === false && auth.user?._id === items.item.receiverId ? (
                     <>
                     <View style={{width: 20, height: 20,  backgroundColor: 'purple', borderRadius: 20, alignItems: 'center', justifyContent: 'center'}} >
-                  <Text style={{color: 'white'}} >{items.item.chat?.length -1}</Text>
+                  <Text style={{color: 'white'}} >{items.item.chat?.length >= 2 ? items.item.chat?.length -1 : items.item.chat?.length}</Text>
                   </View>
                   </>
                   ) : null
