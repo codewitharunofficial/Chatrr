@@ -63,16 +63,20 @@ const Conversation = () => {
       let cloneArray = [...messages];
       setChat(cloneArray.concat(msg.messages));
       setNewMessage(msg.newMessage);
+      setRead(false);
     });
   }, []);
 
   //marking messages as seen
+  // console.log(newMessage.from.name);
+
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: true,
       shouldShowAlert: true,
-      shouldSetBadge: true
+      shouldSetBadge: true,
+      priority: Notifications.AndroidNotificationPriority,
     }),
   });
 
@@ -93,8 +97,8 @@ const Conversation = () => {
       try {
         await Notifications.scheduleNotificationAsync({
           content: {
-            title: `New Message`,
-            body: newMessage.message ? newMessage.message.message : 'Unread Message from Arun',
+            title: `New Message from ${newMessage.from.name}`,
+            body: newMessage.message ? newMessage.message.message : "You May Have Unread Messages",
             priority: Notifications.AndroidNotificationPriority,
             sound: true,
             vibrate: 2

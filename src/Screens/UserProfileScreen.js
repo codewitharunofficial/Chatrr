@@ -114,10 +114,10 @@ const SettingsScreen = () => {
    
           } catch (error) {
               console.log(error.message);
+              Toast.show(error.message + ", " + "Please Try Again");
           }
         }
   };
-
 
   const updateUserDetails = async () => {
        try {

@@ -29,8 +29,6 @@ const LoginScreen = () => {
   }
 
 
-
-
   const logIn = async () => {
 
     try {
@@ -44,7 +42,7 @@ const LoginScreen = () => {
         });
         setLoading(false);
         AsyncStorage.setItem('auth', JSON.stringify(data));
-        AsyncStorage.setItem('LoggedIn', JSON.stringify(true));
+        AsyncStorage.setItem('LoggedIn', 'true');
         AsyncStorage.setItem('token', data.token);
         navigation.navigate('Home');
 
