@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Pressable,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../Contexts/auth";
@@ -14,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
 import axios from "axios";
 import { Image } from "expo-image";
+import socketServcies from "../Utils/SocketServices";
 
 const SettingsScreen = () => {
   const [auth, setAuth] = useAuth();
@@ -46,6 +48,8 @@ const SettingsScreen = () => {
   }, [isFocused, userId]);
 
   const handlePress = async () => {
+    socketServcies.initializeSocket();
+    socketServcies.emit('log-out',  auth.user?._id);
     setAuth({
       ...auth,
       user: null,
@@ -55,6 +59,18 @@ const SettingsScreen = () => {
     Toast.show("Logged Out Successfully!");
     navigation.navigate("Login");
   };
+
+  const handleBackButton = () => {
+    navigation.goBack()
+    return true;
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    };
+  }, [isFocused]);
 
   return (
     <>

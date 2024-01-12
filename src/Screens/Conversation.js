@@ -1,4 +1,12 @@
-import { ImageBackground, StyleSheet, FlatList } from "react-native";
+import {
+  ImageBackground,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  View,
+  Text,
+  Image,
+} from "react-native";
 import React, { useState } from "react";
 import Message from "../Components/Message";
 import InputBox from "../Components/Input/InputBox";
@@ -9,7 +17,9 @@ import socketServcies from "../Utils/SocketServices";
 import { useIsFocused } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import { useAuth } from "../Contexts/auth";
-import Modal from "../Components/Modal/Modal";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { BackHandler } from "react-native";
+import moment from "moment";
 
 const Conversation = () => {
   const [reciever, setReciever] = useState("");
@@ -22,9 +32,26 @@ const Conversation = () => {
   const [auth] = useAuth();
   const [pushToken, setPushToken] = useState([]);
   const [read, setRead] = useState(false);
+  const [name, setName] = useState("");
+  const [photo, setPhoto] = useState("");
+  const [isActive, setIsActive] = useState("false");
+  const [lastseen, setLastSeen] = useState('');
+  const [user, setUser] = useState({});
+  const [userDetails, setUserDetails] = useState({});
+
 
   const route = useRoute();
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const handleBackButton = () => navigation.navigate("Home");
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    };
+  }, []);
+
+  
 
   useEffect(() => {
     navigation.setOptions(
@@ -32,7 +59,12 @@ const Conversation = () => {
       setReciever(route.params.receiver),
       setConvoId(route.params.id),
       setSender(route.params.sender),
-      setRead(route.params.read)
+      setRead(route.params.read),
+      setName(route.params.name),
+      setPhoto(route.params.photo),
+      setIsActive(route.params.status),
+      setLastSeen(route.params?.lastseen),
+      setUser(route.params.user)
     );
   }, [route.params.name]);
 
@@ -70,7 +102,6 @@ const Conversation = () => {
   //marking messages as seen
   // console.log(newMessage.from.name);
 
-
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: true,
@@ -98,10 +129,12 @@ const Conversation = () => {
         await Notifications.scheduleNotificationAsync({
           content: {
             title: `New Message from ${newMessage.from.name}`,
-            body: newMessage.message ? newMessage.message.message : "You May Have Unread Messages",
+            body: newMessage.message
+              ? newMessage.message.message
+              : "You May Have Unread Messages",
             priority: Notifications.AndroidNotificationPriority,
             sound: true,
-            vibrate: 2
+            vibrate: 2,
           },
           trigger: null,
         });
@@ -110,15 +143,17 @@ const Conversation = () => {
       }
     };
     useEffect(() => {
-      if(newMessage?.message && newMessage.message.reciever === auth.user._id){
+      if (
+        newMessage?.message &&
+        newMessage.message.reciever === auth.user._id
+      ) {
         sendPushNotification();
       }
     }, [newMessage?.message]);
   }
 
-
   useEffect(() => {
-    if(newMessage?.message){
+    if (newMessage?.message) {
       getNotificationPermission();
     }
   }, [newMessage?.message]);
@@ -126,11 +161,86 @@ const Conversation = () => {
 
   return (
     <>
+      <View
+        style={{
+          width: "100%",
+          height: "10%",
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 10,
+          backgroundColor: 'lightblue'
+        }}
+      >
+        <Ionicons
+          name="arrow-back"
+          size={24}
+          color={"white"}
+          style={{ marginRight: 10 }}
+          onPress={() => navigation.navigate('Home')}
+        />
+        {!photo ? (
+          <FontAwesome
+            name="user-circle"
+            color={"lightgray"}
+            size={50}
+            style={{ marginRight: 10 }}
+          />
+        ) : (
+          <>
+            <Pressable onPress={ async() => navigation.navigate("User-Profile", {
+              user: 'Keshu'
+            })} >
+              <Image
+                source={{
+                  uri: photo,
+                }}
+                style={styles.photo}
+              />
+            </Pressable>
+          </>
+        )}
+        <Pressable
+          onPress={() => navigation.navigate("User-Profile", {
+            params: {
+              user: user
+            }
+          })}
+          style={{ flex: 0.8, gap: 5}}
+        >
+          <Text
+            style={{ fontSize: 20, fontWeight: "bold", alignSelf: "center" }}
+          >
+            {name}
+          </Text>
+          {
+            isActive === "true" ? (
+              <Text
+            style={{ fontSize: 10, fontWeight: "normal", alignSelf: "center", color: 'green'}}
+          >
+            Online
+          </Text>
+            ) : lastseen ? (
+              <Text
+            style={{ fontSize: 10, fontWeight: "normal", alignSelf: "center", transform: [{translateX: 0}]}}
+          >
+           Last Seen {moment(lastseen).fromNow()}
+          </Text>
+            ) : (
+              <Text
+            style={{ fontSize: 16, fontWeight: "normal", alignSelf: "center" }}
+          >
+            Offline
+          </Text>
+            )
+          }
+          
+        </Pressable>
+      </View>
       <ImageBackground src="" style={styles.bg}>
         <FlatList
           data={chat.length > 0 ? chat : messages}
           renderItem={(items) => (
-            <Message message={items} receiver={reciever} read={{read}} />
+            <Message message={items} receiver={reciever} read={{ read }} />
           )}
           inverted
           style={styles.list}
@@ -149,6 +259,12 @@ const styles = StyleSheet.create({
   list: {
     padding: 10,
     marginVertical: 10,
+  },
+  photo: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    marginRight: 10,
   },
 });
 

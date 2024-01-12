@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, TextInput, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, StyleSheet, TextInput, ScrollView, ActivityIndicator, BackHandler } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -118,6 +118,18 @@ const SettingsScreen = () => {
           }
         }
   };
+
+  const handleBackButton = () => {
+    navigation.goBack()
+    return true;
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    };
+  }, [isFocused]);
 
   const updateUserDetails = async () => {
        try {

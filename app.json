@@ -47,7 +47,10 @@
         "CAMERA",
         "WRITE_EXTERNAL_STORAGE",
         "READ_CONTACTS",
-        "READ_MEDIA_IMAGES"
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION"
       ],
       "package": "com.codewitharun.chatrr"
     },

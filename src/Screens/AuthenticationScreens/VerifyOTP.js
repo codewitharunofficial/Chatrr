@@ -1,72 +1,81 @@
 import {
   View,
   Text,
-  StyleSheet,
-  Image,
   TextInput,
   Pressable,
-  ScrollView,
   ToastAndroid,
+  Image,
+  StyleSheet,
 } from "react-native";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import client from "../../Components/utils/client";
 import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-// import toast from "react-hot-toast";
 
-const SignUpScreen = () => {
+const VerifyOTP = () => {
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+
   //navigation
+
   const navigation = useNavigation();
 
-  //states
+  //context
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
+  const [auth] = useAuth();
 
-  const [auth, setAuth] = useAuth();
-
-  //user
-
-  const value = {
-    name,
-    password,
-    phone,
-    email,
-  };
-
-  const signUp = async () => {
+  const verifyOTP = async () => {
+    setEmail(auth.user.email);
     try {
+      setLoading(true);
       const { data } = await axios.post(
-        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/create-user`,
-        { ...value }
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/verify-otp`,
+        { email, otp }
       );
       if (data?.success) {
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
-        setAuth({
-          ...auth,
-          user: data.user,
-          token: data.token,
-        });
-
-        AsyncStorage.setItem("auth", JSON.stringify(data));
-        AsyncStorage.setItem("isLogged", "true");
-        navigation.navigate("Email-Verification");
+        setLoading(false);
+        navigation.navigate("Home");
       } else {
+        setLoading(true);
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
+        setLoading(false);
+        navigation.navigate("Login");
       }
     } catch (error) {
       console.log(error.message);
+      setLoading(false);
     }
   };
 
+  const requestOtp = async () => {
+    setEmail(auth.user.email);
+    try {
+      setLoading(true);
+      const { data } = await axios.post(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/request-otp`,
+        { email}
+      );
+      if (data?.success) {
+        ToastAndroid.show(data?.message, ToastAndroid.TOP);
+        setLoading(false);
+      } else {
+        setLoading(true);
+        ToastAndroid.show(data?.message, ToastAndroid.TOP);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log(error.message);
+      ToastAndroid.show(error?.message, ToastAndroid.TOP);
+      
+      setLoading(false);
+    }
+  }
+
   return (
-    <ScrollView>
-      <View style={{ paddingBottom: 60, marginTop: 60 }}>
+    <View style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
+      <View style={{ marginTop: 70 }}>
         <View style={styles.container}>
           <Image
             src="https://cdn-icons-png.flaticon.com/512/3032/3032932.png"
@@ -74,18 +83,19 @@ const SignUpScreen = () => {
           />
           <Text style={styles.title}>Chatrr</Text>
         </View>
+
         <View style={styles.authContainer}>
-          <View style={{ width: "100%", height: "18%", alignItems: "center" }}>
+          <View style={{ width: "100%", height: "20%", alignItems: "center" }}>
             <Text
               style={{
-                marginTop: 16,
+                marginTop: 20,
                 fontSize: 30,
                 color: "white",
                 fontWeight: "bold",
                 textDecorationLine: "underline",
               }}
             >
-              SignUp
+              Login
             </Text>
           </View>
           <View
@@ -99,58 +109,35 @@ const SignUpScreen = () => {
               paddingVertical: 12,
             }}
           >
+            <Text>Enter the otp sent to <Text style={{color: 'lightgreen'}} >{auth.user.email}</Text></Text>
             <TextInput
-              onChangeText={setPhone}
               required
-              placeholder="Enter Your Phone Number"
-              style={styles.input}
-            />
-            <TextInput
-              onChangeText={setName}
-              required
-              placeholder="Enter Your Name"
-              style={styles.input}
-            />
-
-            <TextInput
-              onChangeText={setPassword}
-              required
-              secureTextEntry={true}
-              placeholder="Enter Your Password"
-              style={styles.input}
-            />
-            <TextInput
-              onChangeText={setEmail}
-              required
-              placeholder="Enter Your Email Address"
+              onChangeText={setOtp}
+              placeholder="Enter OTP"
               style={styles.input}
             />
           </View>
           <View
             style={{
               width: "90%",
-              height: 50,
+              height: "auto",
               alignSelf: "center",
               alignItems: "center",
               flexDirection: "row",
               gap: 15,
               justifyContent: "center",
-              marginTop: -7,
             }}
           >
-            <Pressable onPress={signUp} style={styles.button}>
-              <Text>SignUp</Text>
+            <Pressable onPress={verifyOTP} style={styles.button}>
+              <Text>Verify</Text>
             </Pressable>
-            <Pressable
-              onPress={() => navigation.navigate("Login")}
-              style={styles.button}
-            >
-              <Text>Login</Text>
+            <Pressable onPress={requestOtp} style={styles.button}>
+              <Text>Resend OTP</Text>
             </Pressable>
           </View>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -161,7 +148,7 @@ const styles = StyleSheet.create({
     backgroundColor: "royalblue",
     borderBottomLeftRadius: 20,
     alignSelf: "center",
-    marginTop: 40,
+    marginTop: 50,
     borderTopRightRadius: 20,
     flexDirection: "row",
     alignItems: "center",
@@ -180,14 +167,13 @@ const styles = StyleSheet.create({
   },
   authContainer: {
     width: "90%",
-    height: "70%",
+    height: "65%",
     backgroundColor: "royalblue",
     borderBottomLeftRadius: 20,
     alignSelf: "center",
     marginTop: 50,
     borderTopRightRadius: 20,
     flexDirection: "column",
-    paddingBottom: 50,
   },
   input: {
     backgroundColor: "white",
@@ -198,7 +184,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#00d4ff",
     width: "30%",
-    height: "90%",
+    height: "40%",
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
@@ -206,4 +192,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignUpScreen;
+export default VerifyOTP;

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import moment from "moment";
 import { useAuth } from "../../Contexts/auth";
 import { useState } from "react";
@@ -10,8 +10,11 @@ import { Audio } from "expo-av";
 import * as FileSystem from 'expo-file-system';
 import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from 'expo-media-library';
+import { useNavigation } from "@react-navigation/native";
 const Message = ({ message, receiver, read }) => {
   const [auth] = useAuth();
+
+  const navigation = useNavigation();
 
   const [selected, setselected] = useState("");
   const [deselect, setDeselect] = useState(false);
@@ -168,7 +171,7 @@ const Message = ({ message, receiver, read }) => {
             >
               {message.item.message.message}
             </Text>
-          ) : (
+          ) : message.item.message.format === "mp4" ? (
             <Pressable style={{ minWidth: "50%", flexDirection: 'row' }}>
               {
                 downloaded ? (
@@ -197,7 +200,15 @@ const Message = ({ message, receiver, read }) => {
              <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
              <Text style={{color: 'white', fontSize: 10, margin: 5}} >{parseInt(message.item.message?.duration).toLocaleString('en-IN')} Secs</Text>
             </Pressable>
-          )}
+          ) : message.item.message.format === "png" || message.item.message.format === "jpg" || message.item.message.format === "jpeg" ? (
+               <Pressable onPress={() => navigation.navigate("Image-Viewer", {
+                params: {
+                  image: message.item.message.secure_url
+                }
+               }) } style={{width: 200, height: 150, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'gray', marginTop: -5}} >
+                <Image source={{uri: message.item.message.secure_url}} width={200} height={150} style={{borderRadius: 10}} />
+               </Pressable>
+          ) : null }
 
           <Text style={styles.time}>
             {moment(message.item.createdAt).format("hh:mm")}
@@ -229,7 +240,7 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
   },
   time: {
-    color: "green",
+    color: "lightgreen",
     alignSelf: "flex-end",
     fontSize: 10,
   },

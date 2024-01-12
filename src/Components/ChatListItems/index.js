@@ -24,7 +24,6 @@ import {
 } from "@expo/vector-icons";
 import Toast from "react-native-simple-toast";
 import { BackHandler } from "react-native";
-import * as Notifications from "expo-notifications";
 
 const ChatList = () => {
   const navigate = useNavigation();
@@ -148,16 +147,18 @@ const ChatList = () => {
               renderLeftActions={(progress, dragX) => {
                 const trans = dragX.interpolate({
                   inputRange: [0, 50, 100, 101],
-                  outputRange: [-20, 0, 0, 1],
+                  outputRange: [20, 0, 0, 1],
                 });
                 return (
                   <RectButton
                     style={{
                       justifyContent: "center",
-                      paddingHorizontal: 30,
+                      paddingHorizontal: 10,
                       alignItems: "center",
-                      paddingBottom: 10,
-                      backgroundColor: "red",
+                      backgroundColor: "#00d4ff",
+                      borderRadius: 10,
+                      height: '80%',
+                      marginTop: 5
                     }}
                     onPress={() => {
                       setConvoId("");
@@ -205,6 +206,18 @@ const ChatList = () => {
                         ? items.item.senderId
                         : items.item.receiverId,
                     read: items.item.read,
+                    photo: auth.user?._id === items.item.senderId
+                    ? items.item.receiver.profilePhoto?.secure_url
+                    : items.item.sender.profilePhoto?.secure_url,
+                    status: auth.user?._id === items.item.senderId
+                    ? items.item.receiver.Is_Online
+                    : items.item.sender.Is_Online,
+                    lastseen : auth.user?._id === items.item.senderId
+                    ? items.item.receiver?.lastseen
+                    : items.item.sender?.lastseen,
+                    user: auth.user?._id === items.item.senderId
+                    ? items.item.receiver
+                    : items.item.sender
                   }),
                     setConvoId(items.item._id),
                     setLastMessage(
@@ -262,7 +275,7 @@ const ChatList = () => {
                       {items.item?.chat[items.item.chat.length - 1]?.message
                         ?.message
                         ? items.item?.chat[items.item.chat.length - 1]?.message
-                            ?.message
+                            ?.message.slice(0, 40)
                         : auth.user?._id === items.item.senderId
                         ? "You Sent An Attachment"
                         : `${items.item.sender.name} Sent you An Attachment`}
@@ -302,7 +315,8 @@ const ChatList = () => {
                     ) : null}
                   </View>
                   {
-                    items.item.receiver.Is_Online === true ? (
+                    items.item.senderId === auth.user?._id &&
+                    items.item.receiver.Is_Online === "true" || items.item.receiverId === auth.user?._id && items.item.sender.Is_Online === "true" ? (
                   <Text numberOfLines={2} style={[styles.subTitle, {alignSelf: 'flex-end', color: 'green'}]}>Online</Text>
                     ) : (
                       <Text numberOfLines={2} style={[styles.subTitle, {alignSelf: 'flex-end', color: 'gray'}]}>Offline</Text>
