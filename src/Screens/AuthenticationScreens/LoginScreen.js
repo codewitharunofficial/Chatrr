@@ -22,6 +22,7 @@ const LoginScreen = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState([]);
 
   //navigation
 
@@ -49,10 +50,12 @@ const LoginScreen = () => {
           ...auth,
           user: data.user,
         });
+        setBlocked(data?.user.blocked_users);
         setLoading(false);
         AsyncStorage.setItem("auth", JSON.stringify(data));
         AsyncStorage.setItem("LoggedIn", "true");
         AsyncStorage.setItem("token", data.token);
+        await AsyncStorage.setItem("blocked", JSON.stringify(blocked));
 
         if (data.user.emailStatus !== "Verified") {
           navigation.navigate("Home");
@@ -70,7 +73,6 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
-
   return (
     <>
       {loading === true ? (

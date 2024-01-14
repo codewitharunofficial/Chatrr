@@ -1,53 +1,67 @@
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native'
-import React from 'react'
-import { useNavigation } from '@react-navigation/native'
-import { useAuth } from '../../Contexts/auth'
-import axios from 'axios'
+import { View, Text, Pressable, Image, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useAuth } from "../../Contexts/auth";
+import axios from "axios";
 
 const UsersList = ({ users }) => {
+  const navigation = useNavigation();
+  const [auth] = useAuth();
+  const isFocused = useIsFocused();
 
-    const navigation = useNavigation();
-    const [auth] = useAuth();
+  const [blockedUsers, setBlockedusers] = useState([]);
+  const [isBlocked, setIsBlocked] = useState();
+  useEffect(()=> {
+    if(isFocused){
 
-
+      setBlockedusers(auth?.user?.blocked);
+    }
+}, [isFocused]);
 
   return (
-    <Pressable
-              onPress={ async () => {
-                try {
-                  const { data } = await axios.post(
-                    `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/create-conversation`,
-                    { sender: auth.user._id, receiver: users.item._id }
-                  );
-                  console.log(data.newConvo);
-                  navigation.navigate("Conversation", {
-                    name: users.item.name,
-                    receiver: users.item._id,
-                    sender: auth.user._id,
-                    id: data.newConvo,
-                  });
-                } catch (error) {
-                  console.log(error.message);
-                }
-              }}
-              style={styles.container}
-            >
-              <Image
-                source={{ uri: users?.item?.profilePhoto?.secure_url, headers: {'Accept': 'image/*'} }}
-                style={styles.photo}
-                width={50}
-                height={50}
-              />
-              <View style={styles.content}>
-                <View style={styles.row}>
-                  <Text numberOfLines={1} style={styles.name}>
-                    {users.item.name}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
-  )
-}
+    <>
+      {users?.item?.blocked_users.includes(auth?.user?._id) ? null : (
+        <Pressable
+          onPress={async () => {
+            try {
+              const { data } = await axios.post(
+                `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/create-conversation`,
+                { sender: auth.user._id, receiver: users.item._id }
+              );
+              console.log(data.newConvo);
+              navigation.navigate("Conversation", {
+                name: users.item.name,
+                receiver: users.item._id,
+                sender: auth.user._id,
+                id: data.newConvo,
+              });
+            } catch (error) {
+              console.log(error.message);
+            }
+          }}
+          style={styles.container}
+        >
+          <Image
+            source={{
+              uri: users?.item?.profilePhoto?.secure_url,
+              headers: { Accept: "image/*" },
+            }}
+            style={styles.photo}
+            width={50}
+            height={50}
+          />
+          <View style={styles.content}>
+            <View style={styles.row}>
+              <Text numberOfLines={1} style={styles.name}>
+                {users.item.name}
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      )}
+    </>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -81,4 +95,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UsersList
+export default UsersList;

@@ -3,13 +3,17 @@ import moment from "moment";
 import { useAuth } from "../../Contexts/auth";
 import { useState } from "react";
 import * as Haptics from "expo-haptics";
-import { AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import axios from "axios";
 import Toast from "react-native-simple-toast";
 import { Audio } from "expo-av";
-import * as FileSystem from 'expo-file-system';
-import * as Permissions from 'expo-permissions';
-import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from "expo-file-system";
+import * as Permissions from "expo-permissions";
+import * as MediaLibrary from "expo-media-library";
 import { useNavigation } from "@react-navigation/native";
 const Message = ({ message, receiver, read }) => {
   const [auth] = useAuth();
@@ -23,53 +27,54 @@ const Message = ({ message, receiver, read }) => {
   const [play, setPlay] = useState(false);
   const [canPlay, setCanPlay] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [uri, setUri] = useState('');
+  const [uri, setUri] = useState("");
   const [downloaded, setDownloaded] = useState(false);
-  const [filename, setFilename] = useState('');
-
+  const [filename, setFilename] = useState("");
 
   async function downloadAudio() {
     console.log(url);
     const fileName = `${filename}.m4a`;
-    const result = await FileSystem.downloadAsync(url, FileSystem.documentDirectory + fileName, {
-      headers: {
-        'Content-Type': 'video/mp4'
+    const result = await FileSystem.downloadAsync(
+      url,
+      FileSystem.documentDirectory + fileName,
+      {
+        headers: {
+          "Content-Type": "video/mp4",
+        },
       }
-    }); 
+    );
     console.log(result);
     setUri(result.uri);
     setDownloaded(true);
-    saveFile(result.uri, fileName, result.headers['Content-Type']);
-  };
-
-  async function saveFile(uri, fileName, mimetype) {
-        const permissions = await MediaLibrary.requestPermissionsAsync();
-        if(permissions.status != 'granted'){
-          return;
-        }
-        try {
-          const assest = await MediaLibrary.createAssetAsync(uri);
-          const album = await MediaLibrary.getAlbumAsync('Chatrr');
-          if(album == null){
-            await MediaLibrary.createAlbumAsync('Chatrr', assest, false);
-          } else{
-            await MediaLibrary.addAssetsToAlbumAsync([assest], album, false);
-          }
-        } catch (error) {
-          console.log(error)
-        }
+    saveFile(result.uri, fileName, result.headers["Content-Type"]);
   }
 
+  async function saveFile(uri, fileName, mimetype) {
+    const permissions = await MediaLibrary.requestPermissionsAsync();
+    if (permissions.status != "granted") {
+      return;
+    }
+    try {
+      const assest = await MediaLibrary.createAssetAsync(uri);
+      const album = await MediaLibrary.getAlbumAsync("Chatrr");
+      if (album == null) {
+        await MediaLibrary.createAlbumAsync("Chatrr", assest, false);
+      } else {
+        await MediaLibrary.addAssetsToAlbumAsync([assest], album, false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const playAudio = async () => {
     try {
       const loadAudio = async () => {
-
-     const album = await MediaLibrary.getAlbumAsync('Chatrr');
-     if(album) {
-         const file = await MediaLibrary.getAssetInfoAsync(`${filename}.m4a`);
-         console.log(file);
-     }
+        const album = await MediaLibrary.getAlbumAsync("Chatrr");
+        if (album) {
+          const file = await MediaLibrary.getAssetInfoAsync(`${filename}.m4a`);
+          console.log(file);
+        }
 
         const { sound } = await Audio.Sound.createAsync(
           { uri: uri },
@@ -161,7 +166,8 @@ const Message = ({ message, receiver, read }) => {
             },
           ]}
         >
-          {message.item.message.message ? (
+          { message.item.message
+              .message ? (
             <Text
               style={{
                 alignSelf: "flex-start",
@@ -172,51 +178,119 @@ const Message = ({ message, receiver, read }) => {
               {message.item.message.message}
             </Text>
           ) : message.item.message.format === "mp4" ? (
-            <Pressable style={{ minWidth: "50%", flexDirection: 'row' }}>
-              {
-                downloaded ? (
-                  canPlay ? 
-                    (<AntDesign
-                      name="play"
-                      size={20}
-                      color={"white"}
-                      onPress={() => {setFilename(message.item.message.original_filename),playAudio();}}
-                    />) : (
-                      <AntDesign
-                      name="pause"
-                      size={20}
-                      color={"white"}
-                      onPress={() => {pause()}}
-                    />
-                    )
+            <Pressable style={{ minWidth: "50%", flexDirection: "row" }}>
+              {downloaded ? (
+                canPlay ? (
+                  <AntDesign
+                    name="play"
+                    size={20}
+                    color={"white"}
+                    onPress={() => {
+                      setFilename(message.item.message.original_filename),
+                        playAudio();
+                    }}
+                  />
                 ) : (
-                  <MaterialCommunityIcons onPress={() => {setUrl(message.item.message?.secure_url), setFilename(message.item.message.original_filename), downloadAudio()}} name="download" size={20} color={'white'} /> 
+                  <AntDesign
+                    name="pause"
+                    size={20}
+                    color={"white"}
+                    onPress={() => {
+                      pause();
+                    }}
+                  />
                 )
-              }
-             <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
-             <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
-             <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
-             <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
-             <MaterialCommunityIcons name="waveform" size={20} color={'white'} />
-             <Text style={{color: 'white', fontSize: 10, margin: 5}} >{parseInt(message.item.message?.duration).toLocaleString('en-IN')} Secs</Text>
+              ) : (
+                <MaterialCommunityIcons
+                  onPress={() => {
+                    setUrl(message.item.message?.secure_url),
+                      setFilename(message.item.message.original_filename),
+                      downloadAudio();
+                  }}
+                  name="download"
+                  size={20}
+                  color={"white"}
+                />
+              )}
+              <MaterialCommunityIcons
+                name="waveform"
+                size={20}
+                color={"white"}
+              />
+              <MaterialCommunityIcons
+                name="waveform"
+                size={20}
+                color={"white"}
+              />
+              <MaterialCommunityIcons
+                name="waveform"
+                size={20}
+                color={"white"}
+              />
+              <MaterialCommunityIcons
+                name="waveform"
+                size={20}
+                color={"white"}
+              />
+              <MaterialCommunityIcons
+                name="waveform"
+                size={20}
+                color={"white"}
+              />
+              <Text style={{ color: "white", fontSize: 10, margin: 5 }}>
+                {parseInt(message.item.message?.duration).toLocaleString(
+                  "en-IN"
+                )}{" "}
+                Secs
+              </Text>
             </Pressable>
-          ) : message.item.message.format === "png" || message.item.message.format === "jpg" || message.item.message.format === "jpeg" ? (
-               <Pressable onPress={() => navigation.navigate("Image-Viewer", {
-                params: {
-                  image: message.item.message.secure_url
-                }
-               }) } style={{width: 200, height: 150, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'gray', marginTop: -5}} >
-                <Image source={{uri: message.item.message.secure_url}} width={200} height={150} style={{borderRadius: 10}} />
-               </Pressable>
-          ) : null }
+          ) : message.item.message.format === "png" ||
+            message.item.message.format === "jpg" ||
+            message.item.message.format === "jpeg" ? (
+            <Pressable
+              onPress={() =>
+                navigation.navigate("Image-Viewer", {
+                  params: {
+                    image: message.item.message.secure_url,
+                  },
+                })
+              }
+              style={{
+                width: 200,
+                height: 150,
+                borderRadius: 10,
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: "gray",
+                marginTop: -5,
+              }}
+            >
+              <Image
+                source={{ uri: message.item.message.secure_url }}
+                width={200}
+                height={150}
+                style={{ borderRadius: 10 }}
+              />
+            </Pressable>
+          ) : null}
 
           <Text style={styles.time}>
             {moment(message.item.createdAt).format("hh:mm")}
           </Text>
         </Pressable>
-        {
-            auth.user._id === message.item.sender && message.index === 0 && read.read === true ? (<Text style={{alignSelf: 'flex-end', color: 'black', fontSize: 10, marginRight: 10}} >Seen</Text>) : null
-          }
+        {auth.user._id === message.item.sender &&
+        message.index === 0 &&
+        read.read === true ? (
+          <Text
+            style={{
+              alignSelf: "flex-end",
+              color: "black",
+              fontSize: 10,
+              marginRight: 10,
+            }}
+          >
+            Seen
+          </Text>
+        ) : null}
       </View>
       {selected ? (
         <MaterialIcons

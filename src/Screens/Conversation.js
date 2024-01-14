@@ -38,6 +38,8 @@ const Conversation = () => {
   const [lastseen, setLastSeen] = useState('');
   const [user, setUser] = useState({});
   const [userDetails, setUserDetails] = useState({});
+  const [blocked, setBlocked] = useState('');
+  const [isBlocked, setIsBlocked] = useState('');
 
 
   const route = useRoute();
@@ -51,8 +53,6 @@ const Conversation = () => {
     };
   }, []);
 
-  
-
   useEffect(() => {
     navigation.setOptions(
       { title: route.params.name },
@@ -64,7 +64,9 @@ const Conversation = () => {
       setPhoto(route.params.photo),
       setIsActive(route.params.status),
       setLastSeen(route.params?.lastseen),
-      setUser(route.params.user)
+      setUser(route.params.user),
+      setBlocked(route.params.blockStatus),
+      setIsBlocked(route.params.isBlocked),
     );
   }, [route.params.name]);
 
@@ -246,7 +248,13 @@ const Conversation = () => {
           style={styles.list}
         />
       </ImageBackground>
-      <InputBox reciever={reciever} convoId={convoId} sender={sender} />
+      {
+        blocked === "false" && isBlocked === "false" ? (
+          <InputBox reciever={reciever} convoId={convoId} sender={sender} />
+        ) : (
+          <Text style={{alignSelf: 'center', fontSize: 12}} >{blocked === "true" ? "Can't Send Message To The Users You Blocked" : "The User Might Have Blocked You Or Isn't available anymore"}</Text>
+        )
+      }
     </>
   );
 };

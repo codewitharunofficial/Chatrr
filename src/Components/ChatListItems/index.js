@@ -24,6 +24,7 @@ import {
 } from "@expo/vector-icons";
 import Toast from "react-native-simple-toast";
 import { BackHandler } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChatList = () => {
   const navigate = useNavigation();
@@ -37,6 +38,7 @@ const ChatList = () => {
   const [lastMessage, setLastMessage] = useState({});
   const [receiverId, setReceiverId] = useState("");
   const [active, setActive] = useState("");
+  const [blocked, setBlocked] = useState([]);
 
   const [read, setRead] = useState(false);
 
@@ -59,6 +61,10 @@ const ChatList = () => {
     return () => {
       BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
     };
+  }, [isFocused]);
+
+  useEffect(() => {
+    setBlocked(auth?.user?.blocked_users);
   }, [isFocused]);
 
   const handleSwipeLeft = async () => {
@@ -96,7 +102,7 @@ const ChatList = () => {
       getChats();
       setRead(false);
     }
-  }, [isFocused, chat, handleSwipeLeft]);
+  }, [isFocused, chat, handleSwipeLeft, auth]);
 
   const setMessagesAsRead = async () => {
     try {
@@ -129,14 +135,19 @@ const ChatList = () => {
             height: "100%",
             alignItems: "center",
             justifyContent: "center",
-            paddingHorizontal: 20
+            paddingHorizontal: 20,
           }}
         >
-          <Text style={{fontSize: 20}} >No Conversations</Text>
-          <View style={{padding: 20, flexDirection: 'row'}} >
-          <Text style={{fontSize: 16}} >Start One By Tapping To </Text>
-          <Entypo name='new-message' color={'royalblue'} size={24} style={{marginRight: 5}} />
-          <Text style={{fontSize: 16}} >Above</Text>
+          <Text style={{ fontSize: 20 }}>No Conversations</Text>
+          <View style={{ padding: 20, flexDirection: "row" }}>
+            <Text style={{ fontSize: 16 }}>Start One By Tapping To </Text>
+            <Entypo
+              name="new-message"
+              color={"royalblue"}
+              size={24}
+              style={{ marginRight: 5 }}
+            />
+            <Text style={{ fontSize: 16 }}>Above</Text>
           </View>
         </View>
       ) : (
@@ -157,15 +168,15 @@ const ChatList = () => {
                       alignItems: "center",
                       backgroundColor: "#00d4ff",
                       borderRadius: 10,
-                      height: '80%',
-                      marginTop: 5
+                      height: "80%",
+                      marginTop: 5,
                     }}
                     onPress={() => {
                       setConvoId("");
                     }}
                   >
                     <Animated.Text
-                      style={{ transform: [{ translateX: trans }] }}
+                      style={{ transform: [{ translateX: trans }]}}
                     >
                       <MaterialIcons
                         onPress={handleSwipeLeft}
@@ -192,11 +203,15 @@ const ChatList = () => {
               <Pressable
                 onPress={() => {
                   navigate.navigate("Conversation", {
-                    id: items.item._id,
+                    id: items.item?._id,
                     name:
-                      auth.user._id === items.item.senderId
-                        ? items.item?.receiver.name
-                        : items.item.sender.name,
+                      auth.user?._id === items.item.senderId &&
+                      items.item?.receiver?.blocked_users?.includes(auth?.user?._id)
+                        ||
+                          auth?.user?._id === items.item?.receiverId &&
+                            items.item?.sender?.blocked_users?.includes(auth?.user?._id)
+                        ? "Chatrr User"
+                        : auth.user?._id === items.item.senderId ? items.item?.receiver?.name : items.item?.sender?.name,
                     receiver:
                       auth.user._id === items.item.senderId
                         ? items.item.receiverId
@@ -206,18 +221,24 @@ const ChatList = () => {
                         ? items.item.senderId
                         : items.item.receiverId,
                     read: items.item.read,
-                    photo: auth.user?._id === items.item.senderId
-                    ? items.item.receiver.profilePhoto?.secure_url
-                    : items.item.sender.profilePhoto?.secure_url,
-                    status: auth.user?._id === items.item.senderId
-                    ? items.item.receiver.Is_Online
-                    : items.item.sender.Is_Online,
-                    lastseen : auth.user?._id === items.item.senderId
-                    ? items.item.receiver?.lastseen
-                    : items.item.sender?.lastseen,
-                    user: auth.user?._id === items.item.senderId
-                    ? items.item.receiver
-                    : items.item.sender
+                    photo:
+                      auth.user?._id === items.item.senderId
+                        ? items.item.receiver?.profilePhoto?.secure_url
+                        : items.item.sender?.profilePhoto?.secure_url,
+                    status:
+                      auth.user?._id === items.item.senderId
+                        ? items.item.receiver?.Is_Online
+                        : items.item.sender?.Is_Online,
+                    lastseen:
+                      auth.user?._id === items.item.senderId
+                        ? items.item.receiver?.lastseen
+                        : items.item.sender?.lastseen,
+                    user:
+                      auth.user?._id === items.item.senderId
+                        ? items.item.receiver
+                        : items.item.sender,
+                        blockStatus: auth?.user?._id === items.item.senderId && blocked?.includes(items.item.receiverId) || auth?.user?._id === items.item.receiverId && blocked?.includes(items.item.senderId) ? "true" : "false",
+                        isBlocked: auth?.user?._id === items.item.senderId && items.item?.receiver?.blocked_users?.includes(auth.user?._id) || auth?.user?._id === items.item.receiverId && items.item?.sender?.blocked_users?.includes(auth?.user?._id) ? "true" : "false",
                   }),
                     setConvoId(items.item._id),
                     setLastMessage(
@@ -250,9 +271,13 @@ const ChatList = () => {
                 <View style={styles.content}>
                   <View style={styles.row}>
                     <Text numberOfLines={1} style={styles.name}>
-                      {auth.user?._id === items.item.senderId
-                        ? items.item?.receiver.name
-                        : items.item.sender.name}
+                      {auth.user?._id === items.item.senderId &&
+                      items.item?.receiver?.blocked_users?.includes(auth?.user?._id)
+                        ||
+                          auth?.user?._id === items.item?.receiverId &&
+                            items.item?.sender?.blocked_users?.includes(auth?.user?._id)
+                        ? "Chatrr User"
+                        : auth.user?._id === items.item.senderId ? items.item?.receiver?.name : items.item?.sender?.name}
                     </Text>
                     <Text numberOfLines={1} style={styles.subTitle}>
                       {items.item?.chat[items.item.chat.length - 1]?.createdAt
@@ -274,14 +299,17 @@ const ChatList = () => {
                     <Text style={styles.subTitle}>
                       {items.item?.chat[items.item.chat.length - 1]?.message
                         ?.message
-                        ? items.item?.chat[items.item.chat.length - 1]?.message
-                            ?.message.slice(0, 40)
-                        : auth.user?._id === items.item.senderId
+                        ? items.item?.chat[
+                            items.item.chat.length - 1
+                          ]?.message?.message.slice(0, 40)
+                        : auth.user?._id === items.item.senderId && items.item.chat[items.item.chat.length - 1]?.message
+                        ?.asset_id
                         ? "You Sent An Attachment"
-                        : `${items.item.sender.name} Sent you An Attachment`}
+                        : auth.user?._id === items.item.receiverId && items.item.chat[items.item.chat.length - 1]?.message
+                        ?.assest_id ? (`${items.item?.sender?.name} Sent you An Attachment`) : null}
                     </Text>
-                    {!items.item.chat[items.item.chat.length - 1]?.message
-                      ?.message ? (
+                    {items.item.chat[items.item.chat.length - 1]?.message
+                      ?.asset_id ? (
                       <Entypo
                         style={{ marginLeft: -60, marginTop: 3 }}
                         name="attachment"
@@ -314,14 +342,30 @@ const ChatList = () => {
                       </>
                     ) : null}
                   </View>
-                  {
-                    items.item.senderId === auth.user?._id &&
-                    items.item.receiver.Is_Online === "true" || items.item.receiverId === auth.user?._id && items.item.sender.Is_Online === "true" ? (
-                  <Text numberOfLines={2} style={[styles.subTitle, {alignSelf: 'flex-end', color: 'green'}]}>Online</Text>
-                    ) : (
-                      <Text numberOfLines={2} style={[styles.subTitle, {alignSelf: 'flex-end', color: 'gray'}]}>Offline</Text>
-                    )
-                  }
+                  {(items.item.senderId === auth.user?._id &&
+                    items.item?.receiver?.Is_Online === "true") ||
+                  (items.item.receiverId === auth.user?._id &&
+                    items.item?.sender?.Is_Online === "true") ? (
+                    <Text
+                      numberOfLines={2}
+                      style={[
+                        styles.subTitle,
+                        { alignSelf: "flex-end", color: "green" },
+                      ]}
+                    >
+                      Online
+                    </Text>
+                  ) : (
+                    <Text
+                      numberOfLines={2}
+                      style={[
+                        styles.subTitle,
+                        { alignSelf: "flex-end", color: "gray" },
+                      ]}
+                    >
+                      Offline
+                    </Text>
+                  )}
                 </View>
               </Pressable>
             </Swipeable>
