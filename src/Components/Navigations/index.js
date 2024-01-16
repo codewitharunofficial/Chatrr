@@ -17,6 +17,8 @@ import VerifyOTP from '../../Screens/AuthenticationScreens/VerifyOTP'
 import EmailVerification from "../../Screens/AuthenticationScreens/EmailVerification";
 import UserDetailsScreen from "../../Screens/UserDetailsScreen";
 import ImageViewerScreen from "../../Screens/ImageViewerScreen";
+import DeleteAccountScreen from "../../Screens/AuthenticationScreens/DeleteAccountScreen";
+import ContactScreen from "../../Screens/ContactScreen";
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
 
@@ -124,6 +126,11 @@ const Navigator = () => {
             name="Account-Settings"
             component={AccountSettingScreen}
             options={{ headerTitleAlign: "left" }}
+          />
+          <Stack.Screen
+            name="delete-account"
+            component={DeleteAccountScreen}
+            options={{ headerTitleAlign: "center" }}
           />
         </Stack.Navigator>
       )}

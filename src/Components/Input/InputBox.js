@@ -54,13 +54,14 @@ const InputBox = ({ reciever, convoId, sender }) => {
         playsInSilentModeIOS: true,
         playThroughEarpieceAndroid: true,
       });
-      console.log("Starting Recording...");
+      Toast.show("Starting Recording...");
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       setRecording(recording);
     } catch (error) {
       console.log("Failed to Start Recording", error);
+      Toast.show("Failed to Start Recording", error);
     }
   }
 
@@ -117,41 +118,43 @@ const InputBox = ({ reciever, convoId, sender }) => {
       Toast.show("Sorry, Please Allow to Procceed Further")
      } else {
 
-    const res = await ImagePicker.launchImageLibraryAsync({
+    const {assets} = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
     });
-
-    console.log(res);
-    setImage(res.assets[0].uri);
-
+    
           try {
+
+            // setImage(assets[0].uri);
+
            const formdata = new FormData();
-           if(!res) return
-   
-   
-           formdata.append('photo', {
-            name: new Date() + '_image',
-            uri: image,
-            type: 'image/jpg'
-           });
-           
-           formdata.append('sender', sender);
-           formdata.append('reciever', reciever);
-           
-           
-           const {data} = await axios.post(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/media/send-photo/`, formdata, {
-            headers:{
-              Accept: 'application/json',
-              'Content-Type': 'multipart/form-data'
-            }
-           });
+           if(!assets){
+            return;
+           } else {
+            formdata.append('photo', {
+              name: new Date() + '_image',
+              uri: assets[0].uri,
+              type: 'image/jpg'
+             });
              
-             if(data?.success === true){
-                Toast.show(data?.message);
-             } else {
-                Toast.show(data?.message)
-             }
+             formdata.append('sender', sender);
+             formdata.append('reciever', reciever);
+             
+             
+             const {data} = await axios.post(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/media/send-photo/`, formdata, {
+              headers:{
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data'
+              }
+             });
+               
+               if(data?.success === true){
+                  Toast.show(data?.message);
+               } else {
+                  Toast.show(data?.message);
+               }
+           }
+           
    
           } catch (error) {
               console.log(error.message);

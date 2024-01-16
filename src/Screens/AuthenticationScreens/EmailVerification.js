@@ -8,12 +8,11 @@ import {
   StyleSheet,
 } from "react-native";
 import React, { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
 
 const EmailVerification = () => {
-  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [request, setRequest] = useState(false);
@@ -21,13 +20,15 @@ const EmailVerification = () => {
   //navigation
 
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const {email} = route.params.params;
 
   //context
 
   const [auth] = useAuth();
 
   const verifyOTP = async () => {
-    setEmail(auth.user.email);
     try {
       setLoading(true);
       const { data } = await axios.post(
@@ -51,7 +52,6 @@ const EmailVerification = () => {
   };
 
   const requestOtp = async () => {
-    setEmail(auth?.user?.email);
     try {
       setLoading(true);
       const { data } = await axios.post(

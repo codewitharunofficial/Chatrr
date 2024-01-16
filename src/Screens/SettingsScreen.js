@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../Contexts/auth";
-import { AntDesign, FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-simple-toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,6 +16,7 @@ import { useIsFocused } from "@react-navigation/native";
 import axios from "axios";
 import { Image } from "expo-image";
 import socketServcies from "../Utils/SocketServices";
+import * as Updates from 'expo-updates';
 
 const SettingsScreen = () => {
   const [auth, setAuth] = useAuth();
@@ -71,6 +72,19 @@ const SettingsScreen = () => {
       BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
     };
   }, [isFocused]);
+
+  const updates = async () => {
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if(update.isAvailable){
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      }
+    } catch (error) {
+      console.log(error);
+      Toast.show(`Error While Fetching Updates From Chatrr App Server: ${error}`);
+    }
+  }
 
   return (
     <>
@@ -133,9 +147,14 @@ const SettingsScreen = () => {
               Account <Ionicons name="settings" size={20} />
             </Text>
           </Pressable>
+          <Pressable onPress={updates} style={styles.item}>
+            <Text style={styles.text}>
+              Updates <MaterialIcons name="update" size={24} style={{alignSelf: 'center'}} />
+            </Text>
+          </Pressable>
           <Pressable onPress={handlePress} style={styles.item}>
             <Text style={styles.text}>
-              Logout <MaterialCommunityIcons name="power-settings" size={24} />{" "}
+              Logout <MaterialCommunityIcons name="power-settings" size={24} />
             </Text>
           </Pressable>
         </View>

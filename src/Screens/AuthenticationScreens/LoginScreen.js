@@ -56,11 +56,14 @@ const LoginScreen = () => {
         AsyncStorage.setItem("LoggedIn", "true");
         AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("blocked", JSON.stringify(blocked));
-
-        if (data.user.emailStatus !== "Verified") {
-          navigation.navigate("Home");
+        if ( !data?.user.emailStatus || data?.user?.emailStatus && data.user.emailStatus !== "Verified") {
+          navigation.navigate("Email-Verification-2", {
+            params: {
+              email: data?.user?.email,
+            },
+          });
         } else {
-          navigation.navigate("Email-Verification-2");
+          navigation.navigate("Home");
         }
       } else {
         setLoading(true);

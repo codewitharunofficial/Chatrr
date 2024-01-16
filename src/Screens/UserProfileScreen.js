@@ -74,12 +74,12 @@ const SettingsScreen = () => {
       Toast.show("Sorry, Please Allow to Procceed Further")
      } else {
 
-    const res = await ImagePicker.launchImageLibraryAsync({
+    const {assets} = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
     });
     
-    setPhoto(res.assets[0].uri);
+    
 
           try {
            const formdata = new FormData();
@@ -88,7 +88,7 @@ const SettingsScreen = () => {
    
            formdata.append('profilePhoto', {
             name: new Date() + '_profile',
-            uri: photo,
+            uri: assets[0].uri,
             type: 'image/jpg'
            });
            

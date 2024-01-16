@@ -40,6 +40,7 @@ const ContactScreen = () => {
     }
   };
 
+
   useEffect(() => {
     getContacts();
   });

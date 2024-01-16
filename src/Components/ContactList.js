@@ -1,68 +1,35 @@
 import { View, Text, StyleSheet, Image, Pressable, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useAuth } from '../Contexts/auth';
 import { AntDesign } from '@expo/vector-icons';
+import axios from 'axios';
 
 const ContactList = ({contacts}) => {
 
+   const [users, setUsers] = useState([]);
+
+  const searchUser = async () => {
+    try {
+      const { data } = await axios.get(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/fetch-users`
+      );
+      setUsers(data?.users);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    searchUser();
+  }, []);
+
 
   return (
-    <Pressable
-            key={contacts.item.index}
-            style={{
-              flexDirection: "row",
-              marginHorizontal: 10,
-              marginVertical: 20,
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                borderBottomWidth: StyleSheet.hairlineWidth,
-                borderBottomColor: "lightgray",
-                flexDirection: "row",
-                aligncontacts: "center",
-              }}
-            >
-              <Image
-                src={
-                  contacts.item.imageAvailable == true ? contacts.item.image.uri : ""
-                }
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 30,
-                  marginRight: 30,
-                  marginBottom: 10,
-                }}
-              />
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  marginBottom: 5,
-                }}
-              >
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: 18,
-                    flex: 1,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {contacts.item.name}
-                </Text>
-                <Text style={{ color: "grey" }}>
-                  {contacts.item.phoneNumbers &&
-                    contacts.item.phoneNumbers[0] &&
-                    contacts.item.phoneNumbers[0].number}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
+    <>
+    {
+    }
+    </>
   )
 }
 
