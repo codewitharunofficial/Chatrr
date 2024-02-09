@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Image,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   ToastAndroid,
   ActivityIndicator,
   ScrollView,
@@ -172,19 +172,19 @@ const ResetPasswordScreen = () => {
                   marginBottom: 70,
                 }}
               >
-                <Pressable onPress={requestOtp} style={[styles.button]}>
+                <TouchableOpacity onPress={requestOtp} style={[styles.button]}>
                   <Text>Request OTP</Text>
-                </Pressable>
+                </TouchableOpacity>
                 {request ? (
                   <>
-                    <Pressable onPress={resetPassword} style={[styles.button]}>
+                    <TouchableOpacity onPress={resetPassword} style={[styles.button]}>
                       <Text>Submit & Reset</Text>
-                    </Pressable>
-                    <Pressable style={styles.button}>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.button}>
                       <Text onPress={() => navigation.navigate("Login")}>
                         Log In
                       </Text>
-                    </Pressable>
+                    </TouchableOpacity>
                   </>
                 ) : null}
               </View>

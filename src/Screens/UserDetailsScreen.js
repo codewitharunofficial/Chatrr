@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
 import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import { useAuth } from "../Contexts/auth";
 import { ScrollView } from "react-native-gesture-handler";
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Video } from "expo-av";
 
 const UserDetailsScreen = () => {
   const route = useRoute();
@@ -14,7 +15,7 @@ const UserDetailsScreen = () => {
   const [auth, setAuth] = useAuth();
   const isFocused = useIsFocused();
   const [attachments, setAttachments] = useState([]);
-  const [updatedUser, setUpdatedUser] = useState([]);
+  const [updatedUser, setUpdatedUser] = useState();
   const [blocked, setBlocked] = useState(false);
 
   const { user } = route.params.params;
@@ -96,13 +97,13 @@ const UserDetailsScreen = () => {
 
   return (
     <View style={{ width: "100%", height: "100%", alignItems: "center" }}>
-      <Pressable
+      <TouchableOpacity
         onPress={() =>
-          navigation.navigate("Image-Viewer", {
+          user?.profilePhoto ? navigation.navigate("Image-Viewer", {
             params: {
               image: user?.profilePhoto?.secure_url,
             },
-          })
+          }) : Toast.show("No Photo To Show", 3000)
         }
         style={{
           width: 150,
@@ -116,7 +117,7 @@ const UserDetailsScreen = () => {
           source={{ uri: user?.profilePhoto?.secure_url }}
           style={{ width: 150, height: 150, borderRadius: 100 }}
         />
-      </Pressable>
+      </TouchableOpacity>
       <View
         style={{
           width: "90%",
@@ -140,7 +141,7 @@ const UserDetailsScreen = () => {
             paddingHorizontal: 10,
           }}
         >
-          {user.name}
+          {user?.name}
         </Text>
         <Text
           style={{
@@ -155,7 +156,7 @@ const UserDetailsScreen = () => {
             paddingHorizontal: 10,
           }}
         >
-          {user.phone}
+          {user?.phone}
         </Text>
         <Text
           style={{
@@ -169,10 +170,10 @@ const UserDetailsScreen = () => {
             padding: 10,
           }}
         >
-          {user.email}
+          {user?.email}
         </Text>
       </View>
-      <Pressable onPress={() => blocked === false ? block() : unBlock()} style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+      <TouchableOpacity onPress={() => blocked === false ? block() : unBlock()} style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
         {
           blocked === true ? (
            <>
@@ -186,7 +187,7 @@ const UserDetailsScreen = () => {
             </>
           )
         }
-      </Pressable>
+      </TouchableOpacity>
       <View
         style={{
           width: "90%",
@@ -202,14 +203,16 @@ const UserDetailsScreen = () => {
           attachments.length < 1 ? (
             <Text style={{fontSize: 20, alignSelf: 'center', color: 'white'}} >No Media Files Found</Text>
           ) : (
-            <ScrollView horizontal={true} contentContainerStyle={{paddingHorizontal: 7, gap: 8}} >
+            <ScrollView horizontal={true} contentContainerStyle={{paddingHorizontal: 7, gap: 8, alignItems: 'center'}} >
               {
                 attachments.map((e) => (   
-                  e?.image?.format === "jpg" || "jpeg" || "png" ? (
-                    <Image key={e._id} source={{uri: e?.image?.secure_url}} style={{padding: 5, borderWidth: 1, borderRadius: 10, width: 120, height: 120}} />
-                  ) : e?.audio?.format === "mp4" || "m4a" ? (
-                    <Text>Audio</Text>
-                  ) : null
+                  e.audio ? (
+                   <MaterialIcons key={e._id} name="audiotrack" size={100} color={'orange'} style={{padding: 8, borderWidth: 1, borderRadius: 10}} />
+                  ) : e.image ? (
+                    <Image key={e._id} source={{uri: e.image.secure_url}} width={120} height={120} style={{padding: 20, borderWidth: 1, borderRadius: 10}} />
+                  ) : e.video ? (
+                   <Video key={e._id} resizeMode="cover" source={{uri: e.video.secure_url}} style={{width: 120, height: 120, padding: 20, borderWidth: 1, borderRadius: 10}} />
+                  ) : (null)
                 ))
               }
             </ScrollView>

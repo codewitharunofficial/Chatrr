@@ -2,7 +2,7 @@ import {
   View,
   Text,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   ToastAndroid,
   Image,
   StyleSheet,
@@ -128,12 +128,12 @@ const VerifyOTP = () => {
               justifyContent: "center",
             }}
           >
-            <Pressable onPress={verifyOTP} style={styles.button}>
+            <TouchableOpacity onPress={verifyOTP} style={styles.button}>
               <Text>Verify</Text>
-            </Pressable>
-            <Pressable onPress={requestOtp} style={styles.button}>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={requestOtp} style={styles.button}>
               <Text>Resend OTP</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

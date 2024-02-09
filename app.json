@@ -2,7 +2,7 @@
   "expo": {
     "name": "Chatrr",
     "slug": "whatsapp",
-    "version": "1.0.2",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/Chatrr.png",
     "userInterfaceStyle": "light",
@@ -61,6 +61,12 @@
       "eas": {
         "projectId": "64652f17-8852-41ad-b3ac-3d501ec97aaf"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/64652f17-8852-41ad-b3ac-3d501ec97aaf"
     }
   }
 }

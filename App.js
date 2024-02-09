@@ -5,10 +5,12 @@ import { AuthProvider } from "./src/Contexts/auth";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SoundProvider } from "./src/Contexts/SoundContext";
 
 
 export default function App() {
   return (
+    <SoundProvider>
     <AuthProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
@@ -21,6 +23,7 @@ export default function App() {
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </AuthProvider>
+    </SoundProvider>
   );
 }
 

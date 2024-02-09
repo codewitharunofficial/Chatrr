@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Image,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   ScrollView,
   ToastAndroid,
 } from "react-native";
@@ -138,15 +138,15 @@ const SignUpScreen = () => {
               marginTop: -7,
             }}
           >
-            <Pressable onPress={signUp} style={styles.button}>
+            <TouchableOpacity onPress={signUp} style={styles.button}>
               <Text>SignUp</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={() => navigation.navigate("Login")}
               style={styles.button}
             >
               <Text>Login</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

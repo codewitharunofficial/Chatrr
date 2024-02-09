@@ -2,13 +2,19 @@ import {
   View,
   Text,
   StyleSheet,
-  Pressable,
+  TouchableOpacity,
   ActivityIndicator,
   BackHandler,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../Contexts/auth";
-import { AntDesign, FontAwesome, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  FontAwesome,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-simple-toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,7 +22,7 @@ import { useIsFocused } from "@react-navigation/native";
 import axios from "axios";
 import { Image } from "expo-image";
 import socketServcies from "../Utils/SocketServices";
-import * as Updates from 'expo-updates';
+import * as Updates from "expo-updates";
 
 const SettingsScreen = () => {
   const [auth, setAuth] = useAuth();
@@ -50,7 +56,7 @@ const SettingsScreen = () => {
 
   const handlePress = async () => {
     socketServcies.initializeSocket();
-    socketServcies.emit('log-out',  auth.user?._id);
+    socketServcies.emit("log-out", auth.user?._id);
     setAuth({
       ...auth,
       user: null,
@@ -62,7 +68,7 @@ const SettingsScreen = () => {
   };
 
   const handleBackButton = () => {
-    navigation.goBack()
+    navigation.goBack();
     return true;
   };
 
@@ -76,15 +82,17 @@ const SettingsScreen = () => {
   const updates = async () => {
     try {
       const update = await Updates.checkForUpdateAsync();
-      if(update.isAvailable){
+      if (update.isAvailable) {
         await Updates.fetchUpdateAsync();
         await Updates.reloadAsync();
       }
     } catch (error) {
       console.log(error);
-      Toast.show(`Error While Fetching Updates From Chatrr App Server: ${error}`);
+      Toast.show(
+        `Error While Fetching Updates From Chatrr App Server: ${error}`
+      );
     }
-  }
+  };
 
   return (
     <>
@@ -106,7 +114,7 @@ const SettingsScreen = () => {
         </View>
       ) : (
         <View style={styles.container}>
-          <Pressable style={styles.pressable}>
+          <TouchableOpacity style={styles.TouchableOpacity}>
             {profilePhoto ? (
               <Image
                 source={
@@ -133,30 +141,38 @@ const SettingsScreen = () => {
                 <Text>{user?.phone}</Text>
               </View>
             </View>
-          </Pressable>
-          <Pressable
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={() => navigation.navigate("Profile")}
             style={styles.item}
           >
             <Text style={styles.text}>
               Profile <AntDesign name="user" size={20} />{" "}
             </Text>
-          </Pressable>
-          <Pressable onPress={() => navigation.navigate("Account-Settings")} style={styles.item}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Account-Settings")}
+            style={styles.item}
+          >
             <Text style={styles.text}>
               Account <Ionicons name="settings" size={20} />
             </Text>
-          </Pressable>
-          <Pressable onPress={updates} style={styles.item}>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={updates} style={styles.item}>
             <Text style={styles.text}>
-              Updates <MaterialIcons name="update" size={24} style={{alignSelf: 'center'}} />
+              Updates{" "}
+              <MaterialIcons
+                name="update"
+                size={24}
+                style={{ alignSelf: "center" }}
+              />
             </Text>
-          </Pressable>
-          <Pressable onPress={handlePress} style={styles.item}>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handlePress} style={styles.item}>
             <Text style={styles.text}>
               Logout <MaterialCommunityIcons name="power-settings" size={24} />
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
       )}
     </>
@@ -171,7 +187,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     backgroundColor: "whitesmoke",
   },
-  pressable: {
+  TouchableOpacity: {
     width: "100%",
     height: "13%",
     flexDirection: "row",

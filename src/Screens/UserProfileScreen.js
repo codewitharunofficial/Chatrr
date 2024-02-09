@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, TextInput, ScrollView, ActivityIndicator, BackHandler } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, ActivityIndicator, BackHandler } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -78,12 +78,10 @@ const SettingsScreen = () => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
     });
-    
-    
 
           try {
            const formdata = new FormData();
-           if(!res) return
+           if(!assets) return
    
    
            formdata.append('profilePhoto', {
@@ -149,9 +147,6 @@ const SettingsScreen = () => {
            alert(error.message)
        }
   }
-
-  
-
   return (
     <>
     {
@@ -187,17 +182,17 @@ const SettingsScreen = () => {
         </View>
         <ScrollView style={{padding: 10}} >
         <View style={{width: '100%', height: '80%', marginTop: 10,}} >
-          <Pressable onPress={() => setEditable(true)} style={{alignSelf: 'flex-end', backgroundColor: 'lightgreen', padding: 10, borderRadius: 10}} >
+          <TouchableOpacity onPress={() => setEditable(true)} style={{alignSelf: 'flex-end', backgroundColor: 'lightgreen', padding: 10, borderRadius: 10}} >
             <Text style={{fontSize: 16}} >Update <Feather name="edit" size={16} style={{alignSelf: 'center'}} /> </Text>
-          </Pressable>
-        <View style={styles.pressable} >
+          </TouchableOpacity>
+        <View style={styles.TouchableOpacity} >
           <Ionicons name="person" size={20} />
           <View style={{width: '90%', paddingHorizontal: 20,}} >
             <Text style={{fontSize: 16, fontWeight: '400', color: 'gray'}} >Name</Text>
             <TextInput onChangeText={setName} editable={editable} value={name}  style={{fontSize: 24, fontWeight: '400', color: 'black'}} />
           </View>
         </View>
-        <View style={styles.pressable} >
+        <View style={styles.TouchableOpacity} >
           <Feather name="phone" size={20} />
           <View style={{width: '90%', paddingHorizontal: 20,}} >
             <Text style={{fontSize: 16, fontWeight: '400', color: 'gray'}} >Phone</Text>
@@ -205,7 +200,7 @@ const SettingsScreen = () => {
             
           </View>
         </View>
-        <View style={styles.pressable} >
+        <View style={styles.TouchableOpacity} >
           <MaterialIcons name="email" size={20} />
           <View style={{width: '90%', paddingHorizontal: 20,}} >
             <Text style={{fontSize: 16, fontWeight: '400', color: 'gray'}} >Email</Text>
@@ -215,9 +210,9 @@ const SettingsScreen = () => {
     </View>
     {
       editable === true ? (
-        <Pressable onPress={updateUserDetails} style={{alignSelf: 'center', backgroundColor: '#00d4ff', padding: 10, borderRadius: 10, marginVertical: 10}} >
+        <TouchableOpacity onPress={updateUserDetails} style={{alignSelf: 'center', backgroundColor: '#00d4ff', padding: 10, borderRadius: 10, marginVertical: 10}} >
       <Text>Save <MaterialCommunityIcons name="content-save-check-outline" size={20} /> </Text>
-    </Pressable>
+    </TouchableOpacity>
       ) : null
     }
     </ScrollView>
@@ -251,7 +246,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
   },
-  pressable: {
+  TouchableOpacity: {
     width: "100%",
     height: "auto",
     alignItems: "center",

@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { useAuth } from "../../Contexts/auth";
@@ -112,7 +112,7 @@ const UploadPhotoScreen = () => {
           <FontAwesome name="user-circle" size={112} />
         )}
          
-         <Pressable
+         <TouchableOpacity
           onPress={handlePress}
           style={{ 
             width: "30%",
@@ -125,10 +125,10 @@ const UploadPhotoScreen = () => {
           }}
         >
           <Text onPress={() => navigation.navigate('Home')} style={{color: 'green', textDecorationLine: 'underline'}} >Skip</Text>
-        </Pressable>
+        </TouchableOpacity>
         
 
-        <Pressable
+        <TouchableOpacity
           onPress={handlePress}
           style={{
             backgroundColor: "#00d4ff",
@@ -141,7 +141,7 @@ const UploadPhotoScreen = () => {
           }}
         >
           <Text>Upload</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   );

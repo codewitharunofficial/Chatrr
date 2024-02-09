@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Image,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   ToastAndroid,
   ActivityIndicator,
 } from "react-native";
@@ -50,13 +50,7 @@ const LoginScreen = () => {
           ...auth,
           user: data.user,
         });
-        setBlocked(data?.user.blocked_users);
-        setLoading(false);
-        AsyncStorage.setItem("auth", JSON.stringify(data));
-        AsyncStorage.setItem("LoggedIn", "true");
-        AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("blocked", JSON.stringify(blocked));
-        if ( !data?.user.emailStatus || data?.user?.emailStatus && data.user.emailStatus !== "Verified") {
+        if (!data.user.emailStatus || data.user.emailStatus !== "Verified") {
           navigation.navigate("Email-Verification-2", {
             params: {
               email: data?.user?.email,
@@ -64,7 +58,12 @@ const LoginScreen = () => {
           });
         } else {
           navigation.navigate("Home");
+          
         }
+        AsyncStorage.setItem("auth", JSON.stringify(data));
+        AsyncStorage.setItem("LoggedIn", "true");
+        AsyncStorage.setItem("token", data.token);
+        setLoading(false);
       } else {
         setLoading(true);
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
@@ -159,14 +158,14 @@ const LoginScreen = () => {
                   justifyContent: "center",
                 }}
               >
-                <Pressable onPress={logIn} style={styles.button}>
+                <TouchableOpacity onPress={logIn} style={styles.button}>
                   <Text>Login</Text>
-                </Pressable>
-                <Pressable style={styles.button}>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button}>
                   <Text onPress={() => navigation.navigate("SignUp")}>
                     SignUp
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
               </View>
               <View
                 style={{
@@ -183,7 +182,7 @@ const LoginScreen = () => {
                 <Text style={{ color: "#fff", fontSize: 16 }}>
                   Forgot Password?
                 </Text>
-                <Pressable
+                <TouchableOpacity
                   style={[
                     styles.button,
                     {
@@ -197,7 +196,7 @@ const LoginScreen = () => {
                   <Text onPress={() => navigation.navigate("Reset-Password")}>
                     Reset Password{" "}
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
               </View>
             </View>
           </View>

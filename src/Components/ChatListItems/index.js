@@ -1,7 +1,7 @@
 import moment from "moment";
 import {
   Text,
-  Pressable,
+  TouchableOpacity,
   StyleSheet,
   View,
   FlatList,
@@ -200,7 +200,7 @@ const ChatList = () => {
                 setConvoId("");
               }}
             >
-              <Pressable
+              <TouchableOpacity
                 onPress={() => {
                   navigate.navigate("Conversation", {
                     id: items.item?._id,
@@ -296,17 +296,17 @@ const ChatList = () => {
                       justifyContent: "space-between",
                     }}
                   >
-                    <Text style={styles.subTitle}>
+                    <Text numberOfLines={2} style={[styles.subTitle, {width: '80%'}]}>
                       {items.item?.chat[items.item.chat.length - 1]?.message
                         ?.message
                         ? items.item?.chat[
                             items.item.chat.length - 1
                           ]?.message?.message.slice(0, 40)
-                        : auth.user?._id === items.item.senderId && items.item.chat[items.item.chat.length - 1]?.message
+                        : auth.user?._id === items.item.chat[items.item.chat.length - 1]?.sender && items.item.chat[items.item.chat.length - 1]?.message
                         ?.asset_id
                         ? "You Sent An Attachment"
-                        : auth.user?._id === items.item.receiverId && items.item.chat[items.item.chat.length - 1]?.message
-                        ?.assest_id ? (`${items.item?.sender?.name} Sent you An Attachment`) : null}
+                        : auth.user?._id === items.item.chat[items.item.chat.length - 1]?.reciever && items.item.chat[items.item.chat.length - 1]?.message
+                        ?.asset_id ? (`${items.item?.sender?.name} Sent you An Attachment`) : null}
                     </Text>
                     {items.item.chat[items.item.chat.length - 1]?.message
                       ?.asset_id ? (
@@ -367,7 +367,7 @@ const ChatList = () => {
                     </Text>
                   )}
                 </View>
-              </Pressable>
+              </TouchableOpacity>
             </Swipeable>
           )}
         />

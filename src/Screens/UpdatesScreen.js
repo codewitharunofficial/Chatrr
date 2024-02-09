@@ -1,53 +1,245 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import React from "react";
-import { FontAwesome } from "@expo/vector-icons";
-import * as ImagePicker from 'expo-image-picker';
-import Toast from 'react-native-simple-toast';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  Image,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import Toast from "react-native-simple-toast";
+import socketServcies from "../Utils/SocketServices";
+import axios from "axios";
+import { useAuth } from "../Contexts/auth";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { ProgressBar, Colors } from "react-native-paper";
 
 const UpdatesScreen = () => {
+  const [auth] = useAuth();
+  const isFocused = useIsFocused();
+  const [upload, setUpload] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
+  const [myStory, setMyStory] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-    const handlePress = async () => {
+  const navigation = useNavigation();
 
-        const permission = await ImagePicker.requestCameraPermissionsAsync();
-        
+  const handlePress = async () => {
+    try {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
 
-        if(permission.status !== 'granted'){
-            Toast.show("Sorry, Please Allow to Procceed Further");
+      if (permission.status !== "granted") {
+        Toast.show("Sorry, Please Allow to Procceed Further");
+      } else {
+        const { assets } = await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+          videoMaxDuration: 30,
+        });
+
+        if (assets[0].type === "video") {
+          Toast.show(
+            "Video Status Will Be Updated & Will Be Deleted After 24hrs"
+          );
+        } else if (assets[0].type === "image") {
+          Toast.show(
+            "Image Status Will Be Updated & Will Be Deleted After 24hrs"
+          );
         } else {
-            const res = await ImagePicker.launchCameraAsync({
-                allowsEditing: true,
-                mediaTypes: ImagePicker.MediaTypeOptions.All
-            });
-            console.log(res);
+          Toast.show("Wait What??");
         }
-
+      }
+    } catch (error) {
+      console.log(error.message);
     }
+  };
 
+  const handleAlbum = async () => {
+    try {
+      const libraryPermissions =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (libraryPermissions.status !== "granted") {
+        Toast.show("Sorry Please Give Permissions");
+      } else {
+        const { assets } = await ImagePicker.launchImageLibraryAsync({
+          allowsEditing: true,
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+        });
+
+        try {
+          const formData = new FormData();
+          if (!assets) {
+            setUpload(false);
+            return;
+          } else {
+            formData.append("status", {
+              name: new Date() + "_status",
+              uri: assets[0].uri,
+              type: assets[0]?.type === "image" ? "image/jpg" : "video/mp4",
+            });
+
+            if (formData) {
+              Toast.show("Uploading Status...");
+              const { data } = await axios.post(
+                `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/status/upload-status/${auth?.user?._id}`,
+                formData,
+                {
+                  headers: {
+                    Accept: "application/json",
+                    "Content-Type": "multipart/form-data",
+                  },
+                  onUploadProgress: (progressEvent) => {
+                    const progress = Math.floor(progressEvent.loaded / progressEvent.total * 100);
+                    setUploadProgress(progress);
+                    setUploading(true);
+                  },
+                }
+              );
+              if (data?.success) {
+                Toast.show("Status Updated");
+                setUpload(true);
+                setUploading(false);
+              } else {
+                Toast.show(data?.message);
+                setUpload(false);
+              }
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const getStatus = async () => {
+    try {
+      const { data } = await axios.get(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/status/get-status/${auth?.user?._id}`
+      );
+      setMyStory(data?.myStatus);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  useEffect(() => {
+    getStatus();
+  }, [isFocused, upload]);
+
+  const handleStories = async () => {
+    navigation.navigate("Story-Viewer", {
+      stories: myStory,
+    });
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Updates</Text>
-      <View style={styles.camContainer}>
-        <Pressable
-        onPress={handlePress}
+    <SafeAreaView>
+      {
+        uploading && (
+          <View style={{width: '100%', paddingVertical: 5, backgroundColor: 'green'}} >
+        <Text style={{textAlign: 'center'}} >{ "Uploading..." + " " + uploadProgress + "%"}</Text>
+      </View>
+        )
+      }
+      <View style={styles.container}>
+        <TouchableOpacity
+          onPress={myStory.length > 0 ? handleStories : handleAlbum}
           style={{
-            width: "20%",
-            height: "15%",
-            justifyContent: "center",
-            backgroundColor: "#00d4ff",
-            alignSelf: "flex-end",
-            marginRight: 20,
-            alignItems: "center",
-            borderRadius: 30,
-            shadowColor: "lightgray",
-            
+            width: "100%",
+            borderWidth: StyleSheet.hairlineWidth,
+            paddingVertical: 10,
+            alignSelf: "center",
+            flexDirection: "row",
+            gap: 20,
+            paddingHorizontal: 20,
           }}
         >
-          <FontAwesome style={styles.camera} name="camera" size={20} />
-        </Pressable>
+          {myStory.length > 0 ? (
+            <>
+              <TouchableOpacity
+                style={{
+                  paddingHorizontal: 0,
+                  borderWidth: myStory.length > 0 ? 3 : 0,
+                  borderRadius: 100,
+                  borderColor: "purple",
+                }}
+              >
+                <Image
+                  source={{ uri: auth?.user?.photo?.secure_url }}
+                  width={60}
+                  height={60}
+                  style={{ borderRadius: 100 }}
+                />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 0,
+                borderWidth: myStory.length > 0 ? 3 : 0,
+                borderRadius: 100,
+                borderColor: "purple",
+              }}
+            >
+              <Ionicons name="add-circle" size={50} color={"royalblue"} />
+            </TouchableOpacity>
+          )}
+
+          <Text
+            style={{
+              width: "100%",
+              alignSelf: "center",
+              fontSize: 16,
+              fontWeight: "bold",
+            }}
+          >
+            {myStory.length > 0 ? "My Status" : "Add Status"}
+          </Text>
+        </TouchableOpacity>
+        <View style={styles.camContainer}>
+          <TouchableOpacity
+            onPress={handlePress}
+            style={{
+              width: "20%",
+              height: "15%",
+              justifyContent: "center",
+              backgroundColor: "#00d4ff",
+              alignSelf: "flex-end",
+              marginRight: 20,
+              alignItems: "center",
+              borderRadius: 30,
+              shadowColor: "lightgray",
+            }}
+          >
+            <FontAwesome style={styles.camera} name="camera" size={20} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleAlbum}
+            style={{
+              width: "20%",
+              height: "15%",
+              justifyContent: "center",
+              backgroundColor: "#00d4ff",
+              alignSelf: "flex-end",
+              marginRight: 20,
+              alignItems: "center",
+              borderRadius: 30,
+              shadowColor: "lightgray",
+            }}
+          >
+            <Ionicons name="albums" style={styles.camera} size={20} />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -55,7 +247,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "100%",
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   text: {
     alignSelf: "center",
@@ -66,6 +258,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "80%",
     justifyContent: "flex-end",
+    gap: 10,
   },
 });
 

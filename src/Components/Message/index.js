@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Button } from "react-native";
 import moment from "moment";
 import { useAuth } from "../../Contexts/auth";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
 import {
   AntDesign,
@@ -10,7 +10,7 @@ import {
 } from "@expo/vector-icons";
 import axios from "axios";
 import Toast from "react-native-simple-toast";
-import { Audio } from "expo-av";
+import { Audio, ResizeMode, Video } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import * as Permissions from "expo-permissions";
 import * as MediaLibrary from "expo-media-library";
@@ -24,12 +24,16 @@ const Message = ({ message, receiver, read }) => {
   const [deselect, setDeselect] = useState(false);
   const [sound, setSound] = useState();
   const [url, setUrl] = useState("");
-  const [play, setPlay] = useState(false);
-  const [canPlay, setCanPlay] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [canPlay, setCanPlay] = useState(false);
   const [uri, setUri] = useState("");
   const [downloaded, setDownloaded] = useState(false);
   const [filename, setFilename] = useState("");
+  const [publicId, setPublicId] = useState("");
+  const [status, setStatus] = useState({});
+  const video = useRef(null);
+  const [isPlaying, setIsPLaying] = useState(false);
+  const [duration, setDuration] = useState();
+  const [pause, setPause] = useState(false);
 
   async function downloadAudio() {
     console.log(url);
@@ -67,54 +71,11 @@ const Message = ({ message, receiver, read }) => {
     }
   }
 
-  const playAudio = async () => {
-    try {
-      const loadAudio = async () => {
-        const album = await MediaLibrary.getAlbumAsync("Chatrr");
-        if (album) {
-          const file = await MediaLibrary.getAssetInfoAsync(`${filename}.m4a`);
-          console.log(file);
-        }
-
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: uri },
-          { shouldPlay: true }
-        );
-        setSound(sound);
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded) {
-            setCanPlay(true);
-          } else {
-            setLoading(true);
-            setCanPlay(false);
-          }
-        });
-      };
-
-      loadAudio();
-
-      if (canPlay === true) {
-        await sound.playAsync();
-        if (sound) {
-          sound.unloadAsync();
-          setCanPlay(false);
-          setUrl("");
-        }
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  const pause = async () => {
-    await sound.pauseAsync();
-    setCanPlay(false);
-  };
-
   const deleteMessage = async () => {
     try {
-      const { data } = await axios.delete(
-        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/delete-message/${selected}`
+      const { data } = await axios.post(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/delete-message/${selected}`,
+        { publicId: publicId }
       );
 
       if (data.success === true) {
@@ -143,10 +104,11 @@ const Message = ({ message, receiver, read }) => {
       }}
     >
       <View style={{ width: "100%" }}>
-        <Pressable
+        <TouchableOpacity
           onLongPress={() => {
             setselected(message.item._id),
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setPublicId(message.item.message?.public_id);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           }}
           onPress={() => (selected ? setDeselect(true) : null)}
           style={[
@@ -166,8 +128,7 @@ const Message = ({ message, receiver, read }) => {
             },
           ]}
         >
-          { message.item.message
-              .message ? (
+          {message.item.message.message ? (
             <Text
               style={{
                 alignSelf: "flex-start",
@@ -177,77 +138,75 @@ const Message = ({ message, receiver, read }) => {
             >
               {message.item.message.message}
             </Text>
-          ) : message.item.message.format === "mp4" ? (
-            <Pressable style={{ minWidth: "50%", flexDirection: "row" }}>
-              {downloaded ? (
-                canPlay ? (
-                  <AntDesign
-                    name="play"
-                    size={20}
-                    color={"white"}
-                    onPress={() => {
-                      setFilename(message.item.message.original_filename),
-                        playAudio();
-                    }}
-                  />
-                ) : (
-                  <AntDesign
-                    name="pause"
-                    size={20}
-                    color={"white"}
-                    onPress={() => {
-                      pause();
-                    }}
-                  />
-                )
-              ) : (
-                <MaterialCommunityIcons
-                  onPress={() => {
-                    setUrl(message.item.message?.secure_url),
-                      setFilename(message.item.message.original_filename),
-                      downloadAudio();
-                  }}
-                  name="download"
+          ) : message.item.message.is_audio === true ? (
+            <TouchableOpacity
+              style={{
+                minWidth: "50%",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              {!canPlay ? (
+                <AntDesign
+                  name="play"
                   size={20}
                   color={"white"}
+                  onPress={async function playAudio() {
+                    try {
+                      const { sound } = await Audio.Sound.createAsync(
+                        {
+                          uri: message.item.message.secure_url,
+                        },
+                        {
+                          shouldPlay: true,
+                        }
+                      );
+                      setSound(sound);
+                      sound.setOnPlaybackStatusUpdate((status) => {
+                        if (status.isBuffering) {
+                          Toast.show("Voice Is Loading...");
+                        } else if (status.isPlaying) {
+                          sound.playAsync();
+                          setCanPlay(true);
+                          setIsPLaying(true);
+                          setDuration(status.playableDurationMillis - status.positionMillis);
+                        } else if (status.didJustFinish) {
+                          Toast.show("Audio Ended");
+                          sound.unloadAsync();
+                          setCanPlay(false);
+                          setIsPLaying(false);
+                        }
+                      });
+                    } catch (error) {
+                      console.log(error.message);
+                    }
+                  }}
+                />
+              ) : (
+                <AntDesign
+                  name="pause"
+                  size={20}
+                  color={"white"}
+                  onPress={ async function pause(){
+                      await sound.pauseAsync();
+                      setPause(true);
+                      setCanPlay(false);
+                  }}
                 />
               )}
-              <MaterialCommunityIcons
-                name="waveform"
-                size={20}
-                color={"white"}
-              />
-              <MaterialCommunityIcons
-                name="waveform"
-                size={20}
-                color={"white"}
-              />
-              <MaterialCommunityIcons
-                name="waveform"
-                size={20}
-                color={"white"}
-              />
-              <MaterialCommunityIcons
-                name="waveform"
-                size={20}
-                color={"white"}
-              />
-              <MaterialCommunityIcons
-                name="waveform"
-                size={20}
-                color={"white"}
-              />
-              <Text style={{ color: "white", fontSize: 10, margin: 5 }}>
-                {parseInt(message.item.message?.duration).toLocaleString(
-                  "en-IN"
-                )}{" "}
-                Secs
+              <Text style={{ color: "white", marginHorizontal: 3 }}>
+                {isPlaying ? "Playing..." : pause ? "Paused" : "Audio"}
               </Text>
-            </Pressable>
+              <Text style={{ color: "white", fontSize: 10, margin: 5 }}>
+                {isPlaying
+                  ? `${Math.round(duration / 1000)}s`
+                  : `${Math.round(message.item.message.duration)}s`}
+              </Text>
+            </TouchableOpacity>
           ) : message.item.message.format === "png" ||
             message.item.message.format === "jpg" ||
             message.item.message.format === "jpeg" ? (
-            <Pressable
+            <TouchableOpacity
               onPress={() =>
                 navigation.navigate("Image-Viewer", {
                   params: {
@@ -270,13 +229,29 @@ const Message = ({ message, receiver, read }) => {
                 height={150}
                 style={{ borderRadius: 10 }}
               />
-            </Pressable>
+            </TouchableOpacity>
+          ) : message.item.message.is_audio === false &&
+            message.item.message.format === "mp4" ? (
+            <View style={{ width: 200, height: 200 }}>
+              <Video
+                resizeMode="cover"
+                ref={video}
+                shouldPlay={false}
+                useNativeControls={true}
+                onPlaybackStatusUpdate={(status) => setStatus(status)}
+                source={{ uri: message.item.message.secure_url }}
+                style={{
+                  flex: 1,
+                  alignSelf: "stretch",
+                }}
+              />
+            </View>
           ) : null}
 
           <Text style={styles.time}>
             {moment(message.item.createdAt).format("hh:mm")}
           </Text>
-        </Pressable>
+        </TouchableOpacity>
         {auth.user._id === message.item.sender &&
         message.index === 0 &&
         read.read === true ? (
@@ -294,7 +269,9 @@ const Message = ({ message, receiver, read }) => {
       </View>
       {selected ? (
         <MaterialIcons
-          onPress={deleteMessage}
+          onPress={() => {
+            deleteMessage();
+          }}
           name="delete"
           size={30}
           color={"royalblue"}

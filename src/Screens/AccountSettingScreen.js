@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useAuth } from "../Contexts/auth";
@@ -12,7 +12,7 @@ const AccountSettingScreen = () => {
   return (
     <View style={{ height: "100%", width: "100%", padding: 10 }}>
       <View style={{ width: "100%" }}>
-        <Pressable
+        <TouchableOpacity
         onPress={() => navigation.navigate("delete-account", {
           params: {
             id: auth.user?._id,
@@ -28,7 +28,7 @@ const AccountSettingScreen = () => {
         >
           <Text style={{ color: "red", }}>Delete-Account</Text>
           <AntDesign name="deleteuser" size={24} color={'red'} />
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   );

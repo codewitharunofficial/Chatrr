@@ -1,8 +1,9 @@
-import { View, Text, Pressable, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet, ToastAndroid } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../Contexts/auth";
 import axios from "axios";
+import { FontAwesome } from "@expo/vector-icons";
 
 const UsersList = ({ users }) => {
   const navigation = useNavigation();
@@ -13,7 +14,6 @@ const UsersList = ({ users }) => {
   const [isBlocked, setIsBlocked] = useState();
   useEffect(()=> {
     if(isFocused){
-
       setBlockedusers(auth?.user?.blocked);
     }
 }, [isFocused]);
@@ -21,7 +21,7 @@ const UsersList = ({ users }) => {
   return (
     <>
       {users?.item?.blocked_users.includes(auth?.user?._id) ? null : (
-        <Pressable
+        <TouchableOpacity
           onPress={async () => {
             try {
               const { data } = await axios.post(
@@ -33,7 +33,13 @@ const UsersList = ({ users }) => {
                 name: users.item.name,
                 receiver: users.item._id,
                 sender: auth.user._id,
+                photo: users.item?.profilePhoto?.secure_url,
                 id: data.newConvo,
+                blockStatus: users?.item?.blocked_users?.includes(auth.user?._id) ? "true" : "false",
+                isBlocked: blockedUsers?.includes(users.item?._id) ? "true" : 'false',
+                status: users.item?.Is_online === "true" ? "true" : "false",
+                lastseen: users.item?.lastseen,
+                user: users.item
               });
             } catch (error) {
               console.log(error.message);
@@ -41,7 +47,9 @@ const UsersList = ({ users }) => {
           }}
           style={styles.container}
         >
-          <Image
+          {
+            users?.item?.profilePhoto ? (
+              <Image
             source={{
               uri: users?.item?.profilePhoto?.secure_url,
               headers: { Accept: "image/*" },
@@ -50,14 +58,21 @@ const UsersList = ({ users }) => {
             width={50}
             height={50}
           />
+            ) : (
+              <FontAwesome onPress={() => ToastAndroid.show("No Photo Available", 2000)} style={styles.photo} name="user-circle" color={"lightgray"} size={50} />
+            )
+          }
           <View style={styles.content}>
             <View style={styles.row}>
               <Text numberOfLines={1} style={styles.name}>
                 {users.item.name}
               </Text>
+              <Text numberOfLines={1} style={styles.subTitle}>
+                {users.item.phone}
+              </Text>
             </View>
           </View>
-        </Pressable>
+        </TouchableOpacity>
       )}
     </>
   );
@@ -68,20 +83,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 10,
     marginVertical: 10,
+    gap: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "lightgray",
   },
   photo: {
     borderRadius: 30,
     marginRight: 10,
+    marginBottom: 12
   },
   content: {
     flex: 1,
     // backgroundColor: 'teal',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "lightgray",
   },
   row: {
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
     marginBottom: 5,
   },

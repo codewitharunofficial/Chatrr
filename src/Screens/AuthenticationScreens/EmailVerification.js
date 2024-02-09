@@ -2,7 +2,7 @@ import {
   View,
   Text,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   ToastAndroid,
   Image,
   StyleSheet,
@@ -43,7 +43,6 @@ const EmailVerification = () => {
         setLoading(true);
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
         setLoading(false);
-        navigation.navigate("Login");
       }
     } catch (error) {
       console.log(error.message);
@@ -137,13 +136,13 @@ const EmailVerification = () => {
               justifyContent: "center",
             }}
           >
-            <Pressable onPress={requestOtp} style={styles.button}>
+            <TouchableOpacity onPress={requestOtp} style={styles.button}>
               <Text>Request OTP</Text>
-            </Pressable>
+            </TouchableOpacity>
             {request ? (
-              <Pressable onPress={verifyOTP} style={styles.button}>
+              <TouchableOpacity onPress={verifyOTP} style={styles.button}>
                 <Text>Verify</Text>
-              </Pressable>
+              </TouchableOpacity>
             ) : null}
           </View>
         </View>

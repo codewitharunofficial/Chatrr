@@ -19,6 +19,9 @@ import UserDetailsScreen from "../../Screens/UserDetailsScreen";
 import ImageViewerScreen from "../../Screens/ImageViewerScreen";
 import DeleteAccountScreen from "../../Screens/AuthenticationScreens/DeleteAccountScreen";
 import ContactScreen from "../../Screens/ContactScreen";
+// import VideoPlayer from "../../Screens/VideoPlayer";
+import VideoPlayers from "../../Screens/VideoPlayer";
+import StoryViewer from "../../Screens/StoryViewer";
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
 
@@ -84,17 +87,17 @@ const Navigator = () => {
             options={{ headerShown: false }}
           />
 
-          <Stack.Screen
+          {/* <Stack.Screen
             name="Users"
             component={UsersScreen}
             options={{ headerTitleAlign: "center" }}
-          />
+          /> */}
 
-          {/* <Stack.Screen
+          <Stack.Screen
               name="Contacts"
               component={ContactScreen}
               options={{ headerTitleAlign: "center" }}
-            /> */}
+            />
 
           <Stack.Screen
             name="Conversation"
@@ -104,6 +107,16 @@ const Navigator = () => {
           <Stack.Screen
             name="Image-Viewer"
             component={ImageViewerScreen}
+            options={{ headerTitleAlign: "center", headerShown: true, animationTypeForReplace: 'pop', animation: 'slide_from_right'}}
+          />
+          <Stack.Screen
+            name="Story-Viewer"
+            component={StoryViewer}
+            options={{ headerTitleAlign: "center", headerShown: true, animationTypeForReplace: 'pop', animation: 'slide_from_right'}}
+          />
+          <Stack.Screen
+            name="Video-Player"
+            component={VideoPlayers}
             options={{ headerTitleAlign: "center", headerShown: true, animationTypeForReplace: 'pop', animation: 'slide_from_right'}}
           />
           <Stack.Screen

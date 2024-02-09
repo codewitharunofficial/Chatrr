@@ -2,7 +2,7 @@ import {
   ImageBackground,
   StyleSheet,
   FlatList,
-  Pressable,
+  TouchableOpacity,
   View,
   Text,
   Image,
@@ -189,8 +189,10 @@ const Conversation = () => {
           />
         ) : (
           <>
-            <Pressable onPress={ async() => navigation.navigate("User-Profile", {
-              user: 'Keshu'
+            <TouchableOpacity onPress={ async() => navigation.navigate("User-Profile", {
+              params: {
+                user: user
+              }
             })} >
               <Image
                 source={{
@@ -198,10 +200,10 @@ const Conversation = () => {
                 }}
                 style={styles.photo}
               />
-            </Pressable>
+            </TouchableOpacity>
           </>
         )}
-        <Pressable
+        <TouchableOpacity
           onPress={() => navigation.navigate("User-Profile", {
             params: {
               user: user
@@ -236,7 +238,7 @@ const Conversation = () => {
             )
           }
           
-        </Pressable>
+        </TouchableOpacity>
       </View>
       <ImageBackground src="" style={styles.bg}>
         <FlatList
