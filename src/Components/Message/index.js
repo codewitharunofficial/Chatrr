@@ -15,6 +15,7 @@ import * as FileSystem from "expo-file-system";
 import * as Permissions from "expo-permissions";
 import * as MediaLibrary from "expo-media-library";
 import { useNavigation } from "@react-navigation/native";
+import {useSound} from '../../Contexts/SoundContext';
 const Message = ({ message, receiver, read }) => {
   const [auth] = useAuth();
 
@@ -22,7 +23,8 @@ const Message = ({ message, receiver, read }) => {
 
   const [selected, setselected] = useState("");
   const [deselect, setDeselect] = useState(false);
-  const [sound, setSound] = useState();
+  const [sound, setSound] = useSound();
+  const [currentTrack, setCurrentTrack] = useSound();
   const [url, setUrl] = useState("");
   const [canPlay, setCanPlay] = useState(false);
   const [uri, setUri] = useState("");
@@ -34,6 +36,7 @@ const Message = ({ message, receiver, read }) => {
   const [isPlaying, setIsPLaying] = useState(false);
   const [duration, setDuration] = useState();
   const [pause, setPause] = useState(false);
+  const [position, setPosition] = useState(0);
 
   async function downloadAudio() {
     console.log(url);
@@ -87,6 +90,8 @@ const Message = ({ message, receiver, read }) => {
       alert(error.message);
     }
   };
+
+  // console.log(currentTrack);
 
   return (
     <View
@@ -153,30 +158,54 @@ const Message = ({ message, receiver, read }) => {
                   color={"white"}
                   onPress={async function playAudio() {
                     try {
-                      const { sound } = await Audio.Sound.createAsync(
-                        {
-                          uri: message.item.message.secure_url,
-                        },
-                        {
-                          shouldPlay: true,
-                        }
-                      );
-                      setSound(sound);
-                      sound.setOnPlaybackStatusUpdate((status) => {
-                        if (status.isBuffering) {
-                          Toast.show("Voice Is Loading...");
-                        } else if (status.isPlaying) {
-                          sound.playAsync();
-                          setCanPlay(true);
-                          setIsPLaying(true);
-                          setDuration(status.playableDurationMillis - status.positionMillis);
-                        } else if (status.didJustFinish) {
-                          Toast.show("Audio Ended");
-                          sound.unloadAsync();
-                          setCanPlay(false);
-                          setIsPLaying(false);
-                        }
-                      });
+
+                      if(sound && message.item._id === currentTrack._id ) {
+                        sound.playFromPositionAsync(position);
+                        setCanPlay(true);
+                        setPause(false);
+                        sound.setOnPlaybackStatusUpdate((status) => {
+                          if (status.isBuffering) {
+                            Toast.show("Voice Is Loading...");
+                          } else if (status.isPlaying) {
+                            sound.playAsync();
+                            setCanPlay(true);
+                            setIsPLaying(true);
+                            setDuration(status.playableDurationMillis - status.positionMillis);
+                          } else if (status.didJustFinish) {
+                            Toast.show("Audio Ended");
+                            sound.unloadAsync();
+                            setCanPlay(false);
+                            setIsPLaying(false);
+                          }
+                        });
+                      } else {
+                        setCurrentTrack(message.item);
+                        const { sound } = await Audio.Sound.createAsync(
+                          {
+                            uri: message.item.message.secure_url,
+                          },
+                          {
+                            shouldPlay: true,
+                          }
+                        );
+                        setSound(sound);
+                        sound.setOnPlaybackStatusUpdate((status) => {
+                          if (status.isBuffering) {
+                            Toast.show("Voice Is Loading...");
+                          } else if (status.isPlaying) {
+                            sound.playAsync();
+                            setCanPlay(true);
+                            setIsPLaying(true);
+                            setDuration(status.playableDurationMillis - status.positionMillis);
+                          } else if (status.didJustFinish) {
+                            Toast.show("Audio Ended");
+                            sound.unloadAsync();
+                            setCanPlay(false);
+                            setIsPLaying(false); 
+                          }
+                        });
+                      }
+                      
                     } catch (error) {
                       console.log(error.message);
                     }
@@ -191,6 +220,12 @@ const Message = ({ message, receiver, read }) => {
                       await sound.pauseAsync();
                       setPause(true);
                       setCanPlay(false);
+                      isPlaying(false);
+                      sound.setOnPlaybackStatusUpdate((status)=> {
+                          if(status.positionMillis){
+                            setPosition(status.positionMillis);
+                          }
+                      })
                   }}
                 />
               )}

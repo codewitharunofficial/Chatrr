@@ -21,11 +21,15 @@ const StoryViewer = () => {
   const currentStory = stories[currentIndex];
 
   const navigateToNextStory = () => {
-    if (currentIndex < stories.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      // clearInterval(intervalId);
-      navigation.navigate("Home");
+    try {
+      if (currentIndex < stories.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        // clearInterval(intervalId);
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -42,7 +46,7 @@ const StoryViewer = () => {
     return () => clearInterval(interval);
   }, [currentIndex, stories]);
 
-  console.log(progress);
+  console.log(currentStory);
 
   return (
     <>

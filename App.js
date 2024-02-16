@@ -6,10 +6,20 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SoundProvider } from "./src/Contexts/SoundContext";
+import { ContactsProvider } from "./src/Contexts/ContactsContext";
+import { getStoragePermissions } from "./src/Utils/Permission";
+import { useEffect } from "react";
 
 
 export default function App() {
+
+useEffect(() => {
+
+  getStoragePermissions();
+}, []);
+
   return (
+    <ContactsProvider>
     <SoundProvider>
     <AuthProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -24,6 +34,7 @@ export default function App() {
       </GestureHandlerRootView>
     </AuthProvider>
     </SoundProvider>
+    </ContactsProvider>
   );
 }
 

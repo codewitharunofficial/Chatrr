@@ -6,6 +6,7 @@ import {
   View,
   Text,
   Image,
+  ToastAndroid,
 } from "react-native";
 import React, { useState } from "react";
 import Message from "../Components/Message";
@@ -17,7 +18,7 @@ import socketServcies from "../Utils/SocketServices";
 import { useIsFocused } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import { useAuth } from "../Contexts/auth";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Feather, FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { BackHandler } from "react-native";
 import moment from "moment";
 
@@ -40,6 +41,9 @@ const Conversation = () => {
   const [userDetails, setUserDetails] = useState({});
   const [blocked, setBlocked] = useState('');
   const [isBlocked, setIsBlocked] = useState('');
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
+  const [peerConnection, setPeerConnection] = useState(null);
 
 
   const route = useRoute();
@@ -160,6 +164,11 @@ const Conversation = () => {
     }
   }, [newMessage?.message]);
 
+  
+  const handleCall = async () => {
+    ToastAndroid.show("Calls will be available soon", 2000);
+  }
+
 
   return (
     <>
@@ -209,10 +218,10 @@ const Conversation = () => {
               user: user
             }
           })}
-          style={{ flex: 0.8, gap: 5}}
+          style={{ flex: 1, gap: 5}}
         >
           <Text
-            style={{ fontSize: 20, fontWeight: "bold", alignSelf: "center" }}
+            style={{ fontSize: 18, fontWeight: "bold", alignSelf: "center" }}
           >
             {name}
           </Text>
@@ -239,6 +248,11 @@ const Conversation = () => {
           }
           
         </TouchableOpacity>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '20%', alignSelf: 'center'}} >
+        <Ionicons onPress={handleCall} name="call" size={24} color={"blue"} />
+        <Feather name="video" size={24} color={"blue"}  />
+        </View>
+        
       </View>
       <ImageBackground src="" style={styles.bg}>
         <FlatList

@@ -4,9 +4,11 @@ const SoundContext = createContext();
 
 const SoundProvider = ({children}) => {
     const [sound, setSound] = useState();
+    const [currentTrack, setCurrentTrack] = useState(null);
+
 
     return(
-        <SoundContext.Provider value={[sound, setSound]} >
+        <SoundContext.Provider value={[sound, setSound, currentTrack, setCurrentTrack]} >
             {children}
         </SoundContext.Provider>
     )

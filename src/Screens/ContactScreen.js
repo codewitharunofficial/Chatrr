@@ -18,9 +18,10 @@ import { useAuth } from "../Contexts/auth";
 import ContactList from "../Components/ContactList";
 import { FlashList } from "@shopify/flash-list/src";
 import UsersList from "../Components/Users/UsersList";
+import { useContacts } from "../Contexts/ContactsContext";
 const ContactScreen = () => {
   const [contacts, setContacts] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useContacts();
   // const [registeredContacts, setRegisteredContacts] = useState([]);
   const [phoneNumbers, setPhoneNumbers] = useState([]);
   const [auth] = useAuth();

@@ -22,11 +22,11 @@ const MainTabNavigation = () => {
         {/* <Tab.Screen name='Users' component={UsersScreen} options={{tabBarIcon: ({ color, size}) => (
           <Ionicons name='call-outline' size={size} color={color} />
         ), headerTitleAlign: 'center'}} /> */}
-        <Tab.Screen name='Conatcts' component={ContactScreen} options={{tabBarIcon: ({ color, size}) => (
+        <Tab.Screen name='Contacts' component={ContactScreen} options={{tabBarIcon: ({ color, size}) => (
           <Ionicons name='call-outline' size={size} color={color} />
         ), headerTitleAlign: 'center'}} />
         <Tab.Screen name='Chats' component={ChatList} options={({navigation})=>({headerTitleAlign: 'center', tabBarIcon: ({color, size}) => (
-          <Ionicons name='ios-chatbubbles-sharp' size={size} color={color} />
+          <Ionicons name='chatbubble-ellipses' size={size} color={color} />
         ), headerRight: () => (
           <Entypo onPress={() => navigation.navigate('Users')} name='new-message' color={'royalblue'} size={24} style={{marginRight: 20}} />
         )})} />

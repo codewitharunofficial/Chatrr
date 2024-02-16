@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   BackHandler,
+  ToastAndroid,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../Contexts/auth";
@@ -83,8 +85,12 @@ const SettingsScreen = () => {
     try {
       const update = await Updates.checkForUpdateAsync();
       if (update.isAvailable) {
+        ToastAndroid.show("New Update Available" + "" + update.manifest.version, 2000);
+        Alert.prompt("New Version Available", "Update to the lastest version to enjoy the lastest features!!");
         await Updates.fetchUpdateAsync();
         await Updates.reloadAsync();
+      } else {
+        ToastAndroid.show("You're currently on the lastest version.", 2000);
       }
     } catch (error) {
       console.log(error);
