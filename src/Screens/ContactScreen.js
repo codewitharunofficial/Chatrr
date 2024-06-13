@@ -15,15 +15,16 @@ import { useIsFocused, useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import { useAuth } from "../Contexts/auth";
-import ContactList from "../Components/ContactList";
 import { FlashList } from "@shopify/flash-list/src";
 import UsersList from "../Components/Users/UsersList";
 import { useContacts } from "../Contexts/ContactsContext";
+import { ActivityIndicator, MD2Colors } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const ContactScreen = () => {
   const [contacts, setContacts] = useState([]);
   const [users, setUsers] = useContacts();
-  // const [registeredContacts, setRegisteredContacts] = useState([]);
   const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [matchedContacts, setMatchedContacts] = useState([]);
   const [auth] = useAuth();
 
   //navigate
@@ -40,6 +41,8 @@ const ContactScreen = () => {
     }
   };
 
+  
+
   useEffect(() => {
     const getPhoneNumbers = async () => {
       contacts.forEach((contact) => {
@@ -55,6 +58,7 @@ const ContactScreen = () => {
           phoneNumbers
         );
         if (data) {
+          // console.log(data?.users);
           setUsers(data?.users);
         }
       } else {
@@ -66,16 +70,36 @@ const ContactScreen = () => {
     }
   }, [contacts]);
 
+  const matchContacts = () => {
+    setMatchedContacts();
+    contacts.forEach((contact) => {
+      users?.forEach((user) => {
+        contact.phoneNumbers?.forEach((number) => {
+             if(number?.number === user.phone) {
+               user.name = contact.name;
+               matchedContacts?.push(user);
+             }
+         })
+      });
+    });
+    AsyncStorage.setItem("contacts", JSON.stringify(matchedContacts));
+  }
+
+
   useEffect(() => {
     if (contacts.length < 1) {
       getContacts();
+    };
+    if(users?.length >=1) {
+      matchContacts();
     }
-  }, [isFocused]);
+    
+  }, [isFocused, users]);
 
   return (
     <>
       {
-        users.length > 0 ? (
+        matchedContacts?.length > 0 ? (
           <ScrollView
         scrollEnabled={true}
         contentContainerStyle={{ width: "100%", height: "auto" }}
@@ -90,7 +114,7 @@ const ContactScreen = () => {
         <View style={{ width: "100%", height: "auto" }}>
           <FlashList
             contentContainerStyle={{ paddingVertical: 20 }}
-            data={users}
+            data={matchedContacts}
             renderItem={(items) => <UsersList users={items} />}
             estimatedItemSize={100}
           />
@@ -161,16 +185,7 @@ const ContactScreen = () => {
       </ScrollView>
         ) : (
           <View style={{width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center'}} >
-            <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "bold",
-              color: "royalblue",
-              marginBottom: 10,
-            }}
-          >
-            Fetching...
-          </Text>
+            <ActivityIndicator size={50} aria-valuetext="Loading Contacts..." animating={true} color={MD2Colors.blue500} />
           </View>
         )
       }

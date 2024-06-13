@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ResetPasswordScreen from "../../Screens/AuthenticationScreens/ResetPasswordScreen";
 import AccountSettingScreen from "../../Screens/AccountSettingScreen";
 import { ActivityIndicator } from "react-native";
-import VerifyOTP from '../../Screens/AuthenticationScreens/VerifyOTP'
+import VerifyOTP from "../../Screens/AuthenticationScreens/VerifyOTP";
 import EmailVerification from "../../Screens/AuthenticationScreens/EmailVerification";
 import UserDetailsScreen from "../../Screens/UserDetailsScreen";
 import ImageViewerScreen from "../../Screens/ImageViewerScreen";
@@ -22,6 +22,11 @@ import ContactScreen from "../../Screens/ContactScreen";
 // import VideoPlayer from "../../Screens/VideoPlayer";
 import VideoPlayers from "../../Screens/VideoPlayer";
 import StoryViewer from "../../Screens/StoryViewer";
+import SelectedFileScreen from "../../Screens/SelectedFileScreen";
+import MainScreen from "../../Screens/MainScreen";
+import ChatList from "../ChatListItems";
+import VoiceCallPage from "../../Screens/VoiceCallScreen";
+import AudioPlayer from "../../Screens/MediaHandlers/AudioPlayer";
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
 
@@ -39,7 +44,6 @@ const Navigator = () => {
   useEffect(() => {
     keepMeLoggedIn();
   }, [isLogged]);
-  
 
   return (
     <NavigationContainer>
@@ -74,7 +78,7 @@ const Navigator = () => {
             component={VerifyOTP}
             options={{ headerShown: false }}
           />
-          
+
           <Stack.Screen
             name="Email-Verification-2"
             component={EmailVerification}
@@ -87,37 +91,78 @@ const Navigator = () => {
             options={{ headerShown: false }}
           />
 
-          {/* <Stack.Screen
-            name="Users"
-            component={UsersScreen}
+          <Stack.Screen
+            name="Chats"
+            component={ChatList}
             options={{ headerTitleAlign: "center" }}
-          /> */}
+          />
 
           <Stack.Screen
-              name="Contacts"
-              component={ContactScreen}
-              options={{ headerTitleAlign: "center" }}
-            />
+            name="Contacts"
+            component={ContactScreen}
+            options={{ headerTitleAlign: "center" }}
+          />
 
           <Stack.Screen
             name="Conversation"
             component={Conversation}
             options={{ headerTitleAlign: "center", headerShown: false }}
           />
+          {/* <Stack.Screen
+            name="Voice-Call"
+            component={VoiceCallPage}
+            options={{ headerTitleAlign: "center", headerShown: false }}
+          /> */}
+
+          <Stack.Screen
+            name="Audio-Player"
+            component={AudioPlayer}
+            options={{
+              headerTitleAlign: "center",
+              headerShown: true,
+              animationTypeForReplace: "pop",
+              animation: "slide_from_bottom",
+            }}
+          />
+
           <Stack.Screen
             name="Image-Viewer"
             component={ImageViewerScreen}
-            options={{ headerTitleAlign: "center", headerShown: true, animationTypeForReplace: 'pop', animation: 'slide_from_right'}}
+            options={{
+              headerTitleAlign: "center",
+              headerShown: true,
+              animationTypeForReplace: "pop",
+              animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen
+            name="Caption"
+            component={SelectedFileScreen}
+            options={{
+              headerTitleAlign: "center",
+              headerShown: true,
+              headerTitle: "File Preview",
+            }}
           />
           <Stack.Screen
             name="Story-Viewer"
             component={StoryViewer}
-            options={{ headerTitleAlign: "center", headerShown: true, animationTypeForReplace: 'pop', animation: 'slide_from_right'}}
+            options={{
+              headerTitleAlign: "center",
+              headerShown: true,
+              animationTypeForReplace: "pop",
+              animation: "slide_from_right",
+            }}
           />
           <Stack.Screen
             name="Video-Player"
             component={VideoPlayers}
-            options={{ headerTitleAlign: "center", headerShown: true, animationTypeForReplace: 'pop', animation: 'slide_from_right'}}
+            options={{
+              headerTitleAlign: "center",
+              headerShown: true,
+              animationTypeForReplace: "pop",
+              animation: "slide_from_right",
+            }}
           />
           <Stack.Screen
             name="Settings"
@@ -127,13 +172,20 @@ const Navigator = () => {
           <Stack.Screen
             name="Profile"
             component={UserProfileScreen}
-            options={{ headerTitleAlign: "center", animationTypeForReplace: 'push', animation: 'slide_from_left' }}
-            
+            options={{
+              headerTitleAlign: "center",
+              animationTypeForReplace: "push",
+              animation: "slide_from_left",
+            }}
           />
           <Stack.Screen
             name="User-Profile"
             component={UserDetailsScreen}
-            options={{ headerTitleAlign: "center", animationTypeForReplace: 'pop', animation: 'slide_from_bottom' }}
+            options={{
+              headerTitleAlign: "center",
+              animationTypeForReplace: "pop",
+              animation: "slide_from_bottom",
+            }}
           />
           <Stack.Screen
             name="Account-Settings"

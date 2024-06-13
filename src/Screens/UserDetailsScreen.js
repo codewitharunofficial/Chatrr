@@ -8,6 +8,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Video } from "expo-av";
+import {BackHandler} from 'react-native'
 
 const UserDetailsScreen = () => {
   const route = useRoute();
@@ -94,6 +95,23 @@ const UserDetailsScreen = () => {
       setBlocked(true);
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    const handleBackPress = () => navigation.goBack();
+
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    }
+  }, [isFocused]);
+
+  const handleAudio = (audio) => {
+    navigation.navigate('Audio-Player', {
+      params: {
+        file: audio
+      }
+    })
+  }
 
   return (
     <View style={{ width: "100%", height: "100%", alignItems: "center" }}>
@@ -207,7 +225,7 @@ const UserDetailsScreen = () => {
               {
                 attachments.map((e) => (   
                   e.audio ? (
-                   <MaterialIcons key={e._id} name="audiotrack" size={100} color={'orange'} style={{padding: 8, borderWidth: 1, borderRadius: 10}} />
+                   <MaterialIcons selectionColor={"lightblue"} onPress={() => handleAudio(e)} key={e._id} name="audiotrack" size={100} color={'orange'} style={{padding: 8, borderWidth: 1, borderRadius: 10}} />
                   ) : e.image ? (
                     <Image key={e._id} source={{uri: e.image.secure_url}} width={120} height={120} style={{padding: 20, borderWidth: 1, borderRadius: 10}} />
                   ) : e.video ? (

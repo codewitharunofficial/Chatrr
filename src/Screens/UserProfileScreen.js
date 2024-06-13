@@ -118,8 +118,7 @@ const SettingsScreen = () => {
   };
 
   const handleBackButton = () => {
-    navigation.goBack()
-    return true;
+    navigation.navigate("Settings");
   };
 
   useEffect(() => {
@@ -177,8 +176,8 @@ const SettingsScreen = () => {
           )
         }
       </View>
-        <MaterialIcons onPress={uploadPhoto} name="photo-camera" size={40} color='royalblue' 
-        style={{ marginTop: -40, alignSelf: 'flex-end', marginLeft: -15}} />
+        <MaterialIcons onPress={uploadPhoto} name="photo-camera" size={30} color='skyblue' 
+        style={{position: 'absolute', left: '62%', top: '52%', zIndex: 1}} />
         </View>
         <ScrollView style={{padding: 10}} >
         <View style={{width: '100%', height: '80%', marginTop: 10,}} >

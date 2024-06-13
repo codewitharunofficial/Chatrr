@@ -84,6 +84,7 @@ const SettingsScreen = () => {
   const updates = async () => {
     try {
       const update = await Updates.checkForUpdateAsync();
+      ToastAndroid.show(update.manifest.runtimeVersion);
       if (update.isAvailable) {
         ToastAndroid.show("New Update Available" + "" + update.manifest.version, 2000);
         Alert.prompt("New Version Available", "Update to the lastest version to enjoy the lastest features!!");
@@ -95,7 +96,8 @@ const SettingsScreen = () => {
     } catch (error) {
       console.log(error);
       Toast.show(
-        `Error While Fetching Updates From Chatrr App Server: ${error}`
+        // `Error While Fetching Updates From Chatrr App Server: ${error}`
+        error
       );
     }
   };
@@ -134,7 +136,7 @@ const SettingsScreen = () => {
               <FontAwesome name="user-circle" color={"lightgray"} size={60} />
             )}
 
-            <View style={{ flex: 0.5, alignItems: "center" }}>
+            <View style={{ flex: 0.4, alignItems: "center" }}>
               <View style={styles.row}>
                 <Text
                   style={{

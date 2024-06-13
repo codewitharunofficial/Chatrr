@@ -1,18 +1,24 @@
 {
+  "cli": {
+    "version": ">= 7.3.0"
+  },
   "build": {
     "preview": {
       "android": {
         "buildType": "apk",
         "channel": "preview"
-      }
+      },
+      "channel": "preview"
     },
     "preview2": {
       "android": {
         "gradleCommand": ":app:assembleRelease"
-      }
+      },
+      "channel": "preview2"
     },
     "preview3": {
-      "developmentClient": true
+      "developmentClient": true,
+      "channel": "preview3"
     },
     "production": {
       "channel": "production"

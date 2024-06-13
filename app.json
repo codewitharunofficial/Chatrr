@@ -28,6 +28,10 @@
           ],
           {
             "iCloudContainerEnvironment": "Production"
+          },
+          "expo-updates",
+          {
+            "username": "codewitharun"
           }
         ]
       ]
@@ -36,9 +40,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.codewitharun.chatrr",
+      "buildNumber": "1"
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/Chatrr.png",
         "backgroundColor": "#000"
@@ -62,14 +69,15 @@
         "projectId": "64652f17-8852-41ad-b3ac-3d501ec97aaf"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.5",
     "updates": {
-      "url": "https://u.expo.dev/64652f17-8852-41ad-b3ac-3d501ec97aaf"
+      "url": "https://u.expo.dev/64652f17-8852-41ad-b3ac-3d501ec97aaf",
+      "enabled": true,
+      "fallbackToCacheTimeout": 0
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-build-properties"
     ]
   }
 }

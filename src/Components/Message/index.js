@@ -1,10 +1,19 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Button } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Button,
+  Animated,
+} from "react-native";
 import moment from "moment";
 import { useAuth } from "../../Contexts/auth";
 import { useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
 import {
   AntDesign,
+  Entypo,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
@@ -12,10 +21,13 @@ import axios from "axios";
 import Toast from "react-native-simple-toast";
 import { Audio, ResizeMode, Video } from "expo-av";
 import * as FileSystem from "expo-file-system";
-import * as Permissions from "expo-permissions";
 import * as MediaLibrary from "expo-media-library";
 import { useNavigation } from "@react-navigation/native";
-import {useSound} from '../../Contexts/SoundContext';
+import { useSound } from "../../Contexts/SoundContext";
+import { RectButton, Swipeable } from "react-native-gesture-handler";
+import { useReply } from "../../Contexts/MessageContext";
+import { useReplyMessage } from "../../Contexts/ReplyContext";
+import RepliedMessage from "../RepliedMessage";
 const Message = ({ message, receiver, read }) => {
   const [auth] = useAuth();
 
@@ -37,6 +49,9 @@ const Message = ({ message, receiver, read }) => {
   const [duration, setDuration] = useState();
   const [pause, setPause] = useState(false);
   const [position, setPosition] = useState(0);
+  const [repliedMessage, setRepliedMessage] = useReplyMessage();
+  const [isReplying, setIsReplying] = useReply();
+  const [selectedMessage, setSelectedMessage] = useReply();
 
   async function downloadAudio() {
     console.log(url);
@@ -91,12 +106,15 @@ const Message = ({ message, receiver, read }) => {
     }
   };
 
-  // console.log(currentTrack);
+  // const replyMessage = (id, reply) => {
+  //           const 
+  // }
+
 
   return (
     <View
       style={{
-        backgroundColor: selected ? "lightgray" : deselect === true ? "" : "",
+        backgroundColor: selected ? "lightgray" : deselect === true ? "white" : "white",
         borderRadius: 10,
         width: "100%",
         flexDirection:
@@ -108,7 +126,57 @@ const Message = ({ message, receiver, read }) => {
         paddingHorizontal: selected ? 8 : 0,
       }}
     >
-      <View style={{ width: "100%" }}>
+      <Swipeable
+        containerStyle={{ width: "100%" }}
+        renderRightActions={
+          auth?.user?._id === message.item.sender
+            ? (progress, dragX) => {
+                const trans = dragX.interpolate({
+                  inputRange: [0, 50, 100, 101],
+                  outputRange: [0, 0, 0, 1],
+                })
+                ;
+                return (
+                  <RectButton
+                    style={{
+                      justifyContent: "center",
+                      paddingHorizontal: 10,
+                      alignItems: "center",
+                      backgroundColor:
+                        message.item.reciever === receiver &&
+                        auth.user._id === message.item.sender
+                          ? "#8f2fd0"
+                          : "#353637",
+                      borderRadius: 10,
+                      height: 40,
+                      marginTop: 5,
+                      alignSelf: "center",
+                    }}
+                  >
+                    <Animated.Text
+                      style={{ transform: [{ translateX: trans }] }}
+                    >
+                      <AntDesign
+                        // onPress={handleSwipeLeft}
+                        name="back"
+                        size={30}
+                        color={"white"}
+                      />
+                    </Animated.Text>
+                  </RectButton>
+                );
+              }
+            : null
+        }
+        
+        onSwipeableOpen={(right) => {
+          if(right){
+            setRepliedMessage(message?.item?.message);
+            setIsReplying(true);
+            setSelectedMessage(message?.item);
+          }
+        }}
+      >
         <TouchableOpacity
           onLongPress={() => {
             setselected(message.item._id),
@@ -133,7 +201,9 @@ const Message = ({ message, receiver, read }) => {
             },
           ]}
         >
-          {message.item.message.message ? (
+          { message.item.message.message && message.item?.isReplied === true ? (
+            <RepliedMessage message={message.item} />
+          ) : message.item.message.message ? (
             <Text
               style={{
                 alignSelf: "flex-start",
@@ -158,8 +228,7 @@ const Message = ({ message, receiver, read }) => {
                   color={"white"}
                   onPress={async function playAudio() {
                     try {
-
-                      if(sound && message.item._id === currentTrack._id ) {
+                      if (sound && message.item._id === currentTrack._id) {
                         sound.playFromPositionAsync(position);
                         setCanPlay(true);
                         setPause(false);
@@ -170,7 +239,10 @@ const Message = ({ message, receiver, read }) => {
                             sound.playAsync();
                             setCanPlay(true);
                             setIsPLaying(true);
-                            setDuration(status.playableDurationMillis - status.positionMillis);
+                            setDuration(
+                              status.playableDurationMillis -
+                                status.positionMillis
+                            );
                           } else if (status.didJustFinish) {
                             Toast.show("Audio Ended");
                             sound.unloadAsync();
@@ -196,16 +268,18 @@ const Message = ({ message, receiver, read }) => {
                             sound.playAsync();
                             setCanPlay(true);
                             setIsPLaying(true);
-                            setDuration(status.playableDurationMillis - status.positionMillis);
+                            setDuration(
+                              status.playableDurationMillis -
+                                status.positionMillis
+                            );
                           } else if (status.didJustFinish) {
                             Toast.show("Audio Ended");
                             sound.unloadAsync();
                             setCanPlay(false);
-                            setIsPLaying(false); 
+                            setIsPLaying(false);
                           }
                         });
                       }
-                      
                     } catch (error) {
                       console.log(error.message);
                     }
@@ -216,16 +290,16 @@ const Message = ({ message, receiver, read }) => {
                   name="pause"
                   size={20}
                   color={"white"}
-                  onPress={ async function pause(){
-                      await sound.pauseAsync();
-                      setPause(true);
-                      setCanPlay(false);
-                      isPlaying(false);
-                      sound.setOnPlaybackStatusUpdate((status)=> {
-                          if(status.positionMillis){
-                            setPosition(status.positionMillis);
-                          }
-                      })
+                  onPress={async function pause() {
+                    await sound.pauseAsync();
+                    setPause(true);
+                    setCanPlay(false);
+                    isPlaying(false);
+                    sound.setOnPlaybackStatusUpdate((status) => {
+                      if (status.positionMillis) {
+                        setPosition(status.positionMillis);
+                      }
+                    });
                   }}
                 />
               )}
@@ -251,7 +325,7 @@ const Message = ({ message, receiver, read }) => {
               }
               style={{
                 width: 200,
-                height: 150,
+                height: 300,
                 borderRadius: 10,
                 borderWidth: StyleSheet.hairlineWidth,
                 borderColor: "gray",
@@ -260,10 +334,12 @@ const Message = ({ message, receiver, read }) => {
             >
               <Image
                 source={{ uri: message.item.message.secure_url }}
-                width={200}
-                height={150}
-                style={{ borderRadius: 10 }}
+                resizeMode="stretch"
+                style={{ borderRadius: 10, width: "100%", height: "100%" }}
               />
+              <Text style={styles.time}>
+                {moment(message.item.createdAt).format("hh:mm")}
+              </Text>
             </TouchableOpacity>
           ) : message.item.message.is_audio === false &&
             message.item.message.format === "mp4" ? (
@@ -301,7 +377,7 @@ const Message = ({ message, receiver, read }) => {
             Seen
           </Text>
         ) : null}
-      </View>
+      </Swipeable>
       {selected ? (
         <MaterialIcons
           onPress={() => {

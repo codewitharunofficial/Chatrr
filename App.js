@@ -7,18 +7,17 @@ import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SoundProvider } from "./src/Contexts/SoundContext";
 import { ContactsProvider } from "./src/Contexts/ContactsContext";
-import { getStoragePermissions } from "./src/Utils/Permission";
-import { useEffect } from "react";
+import { MessageProvider } from "./src/Contexts/MessageContext";
+import { ReplyProvider } from "./src/Contexts/ReplyContext";
 
 
 export default function App() {
 
-useEffect(() => {
-
-  getStoragePermissions();
-}, []);
 
   return (
+    <ReplyProvider>
+
+    <MessageProvider>
     <ContactsProvider>
     <SoundProvider>
     <AuthProvider>
@@ -35,6 +34,8 @@ useEffect(() => {
     </AuthProvider>
     </SoundProvider>
     </ContactsProvider>
+    </MessageProvider>
+    </ReplyProvider>
   );
 }
 

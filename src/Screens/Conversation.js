@@ -18,11 +18,17 @@ import socketServcies from "../Utils/SocketServices";
 import { useIsFocused } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import { useAuth } from "../Contexts/auth";
-import { Feather, FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
+import {
+  Feather,
+  FontAwesome,
+  FontAwesome6,
+  Ionicons,
+} from "@expo/vector-icons";
 import { BackHandler } from "react-native";
 import moment from "moment";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const Conversation = () => {
+const Conversation = ({navigation}) => {
   const [reciever, setReciever] = useState("");
   const [convoId, setConvoId] = useState("");
   const [sender, setSender] = useState("");
@@ -36,24 +42,26 @@ const Conversation = () => {
   const [name, setName] = useState("");
   const [photo, setPhoto] = useState("");
   const [isActive, setIsActive] = useState("false");
-  const [lastseen, setLastSeen] = useState('');
+  const [lastseen, setLastSeen] = useState("");
   const [user, setUser] = useState({});
   const [userDetails, setUserDetails] = useState({});
-  const [blocked, setBlocked] = useState('');
-  const [isBlocked, setIsBlocked] = useState('');
+  const [blocked, setBlocked] = useState("");
+  const [isBlocked, setIsBlocked] = useState("");
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [peerConnection, setPeerConnection] = useState(null);
 
-
   const route = useRoute();
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   useEffect(() => {
-    const handleBackButton = () => navigation.navigate("Home");
-    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    const handleBackButton = () => {
+      navigation.goBack();
+      return true;
+    }
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", handleBackButton);
     return () => {
-      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+      backHandler.remove();
     };
   }, []);
 
@@ -70,7 +78,7 @@ const Conversation = () => {
       setLastSeen(route.params?.lastseen),
       setUser(route.params.user),
       setBlocked(route.params.blockStatus),
-      setIsBlocked(route.params.isBlocked),
+      setIsBlocked(route.params.isBlocked)
     );
   }, [route.params.name]);
 
@@ -100,7 +108,7 @@ const Conversation = () => {
     socketServcies.on("recieved-message", (msg) => {
       let cloneArray = [...messages];
       setChat(cloneArray.concat(msg.messages));
-      setNewMessage(msg.newMessage);
+      setNewMessage(msg?.newMessage ? msg?.newMessage : msg?.reply);
       setRead(false);
     });
   }, []);
@@ -164,22 +172,30 @@ const Conversation = () => {
     }
   }, [newMessage?.message]);
 
-  
   const handleCall = async () => {
-    ToastAndroid.show("Calls will be available soon", 2000);
-  }
-
+    navigation.navigate("Voice-Call", {
+      params: {
+        user: {
+          userID: reciever,
+          name: user?.name,
+          callID: reciever + Date.now()
+        },
+      },
+    });
+  };
 
   return (
     <>
-      <View
+      <SafeAreaView
         style={{
-          width: "100%",
-          height: "10%",
+          // width: "100%",
+          // height: "10%",
           flexDirection: "row",
           alignItems: "center",
-          paddingHorizontal: 10,
-          backgroundColor: 'lightblue'
+          paddingHorizontal: 15,
+          backgroundColor: "lightblue",
+          paddingVertical: 10,
+          paddingTop: -20,
         }}
       >
         <Ionicons
@@ -187,7 +203,7 @@ const Conversation = () => {
           size={24}
           color={"white"}
           style={{ marginRight: 10 }}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate("Home")}
         />
         {!photo ? (
           <FontAwesome
@@ -198,11 +214,15 @@ const Conversation = () => {
           />
         ) : (
           <>
-            <TouchableOpacity onPress={ async() => navigation.navigate("User-Profile", {
-              params: {
-                user: user
+            <TouchableOpacity
+              onPress={async () =>
+                navigation.navigate("User-Profile", {
+                  params: {
+                    user: user,
+                  },
+                })
               }
-            })} >
+            >
               <Image
                 source={{
                   uri: photo,
@@ -213,47 +233,66 @@ const Conversation = () => {
           </>
         )}
         <TouchableOpacity
-          onPress={() => navigation.navigate("User-Profile", {
-            params: {
-              user: user
-            }
-          })}
-          style={{ flex: 1, gap: 5}}
+          onPress={() =>
+            navigation.navigate("User-Profile", {
+              params: {
+                user: user,
+              },
+            })
+          }
+          style={{ flex: 1, gap: 5 }}
         >
           <Text
             style={{ fontSize: 18, fontWeight: "bold", alignSelf: "center" }}
           >
             {name}
           </Text>
-          {
-            isActive === "true" ? (
-              <Text
-            style={{ fontSize: 10, fontWeight: "normal", alignSelf: "center", color: 'green'}}
-          >
-            Online
-          </Text>
-            ) : lastseen ? (
-              <Text
-            style={{ fontSize: 10, fontWeight: "normal", alignSelf: "center", transform: [{translateX: 0}]}}
-          >
-           Last Seen {moment(lastseen).fromNow()}
-          </Text>
-            ) : (
-              <Text
-            style={{ fontSize: 16, fontWeight: "normal", alignSelf: "center" }}
-          >
-            Offline
-          </Text>
-            )
-          }
-          
+          {isActive === "true" ? (
+            <Text
+              style={{
+                fontSize: 10,
+                fontWeight: "normal",
+                alignSelf: "center",
+                color: "green",
+              }}
+            >
+              Online
+            </Text>
+          ) : lastseen ? (
+            <Text
+              style={{
+                fontSize: 10,
+                fontWeight: "normal",
+                alignSelf: "center",
+                transform: [{ translateX: 0 }],
+              }}
+            >
+              Last Seen {moment(lastseen).fromNow()}
+            </Text>
+          ) : (
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "normal",
+                alignSelf: "center",
+              }}
+            >
+              Offline
+            </Text>
+          )}
         </TouchableOpacity>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '20%', alignSelf: 'center'}} >
-        <Ionicons onPress={handleCall} name="call" size={24} color={"blue"} />
-        <Feather name="video" size={24} color={"blue"}  />
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "20%",
+            alignSelf: "center",
+          }}
+        >
+          <Ionicons onPress={() => handleCall()} name="call" size={24} color={"blue"} />
+          <Feather name="video" size={24} color={"blue"} />
         </View>
-        
-      </View>
+      </SafeAreaView>
       <ImageBackground src="" style={styles.bg}>
         <FlatList
           data={chat.length > 0 ? chat : messages}
@@ -264,13 +303,15 @@ const Conversation = () => {
           style={styles.list}
         />
       </ImageBackground>
-      {
-        blocked === "false" && isBlocked === "false" ? (
-          <InputBox reciever={reciever} convoId={convoId} sender={sender} />
-        ) : (
-          <Text style={{alignSelf: 'center', fontSize: 12}} >{blocked === "true" ? "Can't Send Message To The Users You Blocked" : "The User Might Have Blocked You Or Isn't available anymore"}</Text>
-        )
-      }
+      {blocked === "false" && isBlocked === "false" ? (
+        <InputBox reciever={reciever} convoId={convoId} sender={sender} />
+      ) : (
+        <Text style={{ alignSelf: "center", fontSize: 12 }}>
+          {blocked === "true"
+            ? "Can't Send Message To The Users You Blocked"
+            : "The User Might Have Blocked You Or Isn't available anymore"}
+        </Text>
+      )}
     </>
   );
 };

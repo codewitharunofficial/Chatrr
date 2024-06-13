@@ -7,6 +7,8 @@ import {
   FlatList,
   Animated,
   Modal,
+  Alert,
+  ToastAndroid,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
@@ -25,6 +27,7 @@ import {
 import Toast from "react-native-simple-toast";
 import { BackHandler } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useContacts } from "../../Contexts/ContactsContext";
 
 const ChatList = () => {
   const navigate = useNavigation();
@@ -37,8 +40,9 @@ const ChatList = () => {
   const [messagesId, setMessagesId] = useState("");
   const [lastMessage, setLastMessage] = useState({});
   const [receiverId, setReceiverId] = useState("");
-  const [active, setActive] = useState("");
+  // const [active, setActive] = useState("");
   const [blocked, setBlocked] = useState([]);
+  const [contacts, setContacts] = useState();
 
   const [read, setRead] = useState(false);
 
@@ -47,6 +51,15 @@ const ChatList = () => {
   useEffect(() => {
     socketServcies.initializeSocket();
   }, []);
+  
+  async function getContacts(){
+    const data = await AsyncStorage.getItem("contacts");
+      const res = JSON.parse(data);
+      setContacts(res);
+  }
+  useEffect(() => {
+    getContacts();
+  }, [isFocused]);
 
   useEffect(() => {
     socketServcies.on("recieved-message", (msg) => {
@@ -56,7 +69,10 @@ const ChatList = () => {
   }, []);
 
   useEffect(() => {
-    const handleBackButton = () => navigate.goBack("");
+    const handleBackButton = () => {
+      BackHandler.exitApp();
+      ToastAndroid.show("Exited App", 2000);
+    };
     BackHandler.addEventListener("hardwareBackPress", handleBackButton);
     return () => {
       BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
@@ -76,7 +92,6 @@ const ChatList = () => {
           receiver: messagesId,
         }
       );
-      console.log(data);
       Toast.show(data?.message);
     } catch (error) {
       console.log(error);
@@ -90,10 +105,30 @@ const ChatList = () => {
       );
       // console.log(data);
       if (data?.success === true) {
-        setChat(data.chats);
+        contacts?.forEach((contact) => {
+          data.chats.forEach((chat) => {
+             if(chat.sender.phone === contact.phone){
+               chat.sender.name = contact.name;
+               chats.push(chat);
+               
+             } else if(chat?.receiver?.phone === contact?.phone){
+               chat.receiver.name = contact.name;
+               chats.push(chat);
+               
+             } else {
+               return;
+             }
+           });
+        
+        })
+        AsyncStorage.setItem("chats", JSON.stringify(chats));
       }
     } catch (error) {
       console.log(error.message);
+      const data = await AsyncStorage.getItem("chats");
+      const allChats = JSON.parse(data);
+      // console.log("Saved Chats", allChats);
+      setChat(allChats);
     }
   };
 
@@ -106,12 +141,12 @@ const ChatList = () => {
 
   const setMessagesAsRead = async () => {
     try {
-      if (receiverId && auth.user._id === receiverId) {
+      if (receiverId && auth?.user._id === receiverId) {
         const { data } = await axios.post(
           `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/read-message/${convoId}`,
           { lastMessage: lastMessage }
         );
-        console.log(data);
+        // console.log(data);
       } else {
         return;
       }
@@ -123,12 +158,12 @@ const ChatList = () => {
   useEffect(() => {
     socketServcies.initializeSocket();
 
-    socketServcies.emit("connected", auth.user?._id);
+    socketServcies.emit("connected", auth?.user?._id);
   }, []);
 
   return (
     <>
-      {chats.length === 0 ? (
+      {chats?.length === 0 ? (
         <View
           style={{
             width: "100%",
@@ -140,7 +175,7 @@ const ChatList = () => {
         >
           <Text style={{ fontSize: 20 }}>No Conversations</Text>
           <View style={{ padding: 20, flexDirection: "row" }}>
-            <Text style={{ fontSize: 16 }}>Start One By Tapping To </Text>
+            <Text style={{ fontSize: 16 }}>Start One By Tapping</Text>
             <Entypo
               name="new-message"
               color={"royalblue"}
@@ -170,13 +205,14 @@ const ChatList = () => {
                       borderRadius: 10,
                       height: "80%",
                       marginTop: 5,
+                      width: "40%",
                     }}
                     onPress={() => {
                       setConvoId("");
                     }}
                   >
                     <Animated.Text
-                      style={{ transform: [{ translateX: trans }]}}
+                      style={{ transform: [{ translateX: trans }] }}
                     >
                       <MaterialIcons
                         onPress={handleSwipeLeft}
@@ -205,13 +241,18 @@ const ChatList = () => {
                   navigate.navigate("Conversation", {
                     id: items.item?._id,
                     name:
-                      auth.user?._id === items.item.senderId &&
-                      items.item?.receiver?.blocked_users?.includes(auth?.user?._id)
-                        ||
-                          auth?.user?._id === items.item?.receiverId &&
-                            items.item?.sender?.blocked_users?.includes(auth?.user?._id)
+                      (auth.user?._id === items.item.senderId &&
+                        items.item?.receiver?.blocked_users?.includes(
+                          auth?.user?._id
+                        )) ||
+                      (auth?.user?._id === items.item?.receiverId &&
+                        items.item?.sender?.blocked_users?.includes(
+                          auth?.user?._id
+                        ))
                         ? "Chatrr User"
-                        : auth.user?._id === items.item.senderId ? items.item?.receiver?.name : items.item?.sender?.name,
+                        : auth.user?._id === items.item.senderId
+                        ? items.item?.receiver?.name
+                        : items.item?.sender?.name,
                     receiver:
                       auth.user._id === items.item.senderId
                         ? items.item.receiverId
@@ -237,8 +278,24 @@ const ChatList = () => {
                       auth.user?._id === items.item.senderId
                         ? items.item.receiver
                         : items.item.sender,
-                        blockStatus: auth?.user?._id === items.item.senderId && blocked?.includes(items.item.receiverId) || auth?.user?._id === items.item.receiverId && blocked?.includes(items.item.senderId) ? "true" : "false",
-                        isBlocked: auth?.user?._id === items.item.senderId && items.item?.receiver?.blocked_users?.includes(auth.user?._id) || auth?.user?._id === items.item.receiverId && items.item?.sender?.blocked_users?.includes(auth?.user?._id) ? "true" : "false",
+                    blockStatus:
+                      (auth?.user?._id === items.item.senderId &&
+                        blocked?.includes(items.item.receiverId)) ||
+                      (auth?.user?._id === items.item.receiverId &&
+                        blocked?.includes(items.item.senderId))
+                        ? "true"
+                        : "false",
+                    isBlocked:
+                      (auth?.user?._id === items.item.senderId &&
+                        items.item?.receiver?.blocked_users?.includes(
+                          auth.user?._id
+                        )) ||
+                      (auth?.user?._id === items.item.receiverId &&
+                        items.item?.sender?.blocked_users?.includes(
+                          auth?.user?._id
+                        ))
+                        ? "true"
+                        : "false",
                   }),
                     setConvoId(items.item._id),
                     setLastMessage(
@@ -271,13 +328,18 @@ const ChatList = () => {
                 <View style={styles.content}>
                   <View style={styles.row}>
                     <Text numberOfLines={1} style={styles.name}>
-                      {auth.user?._id === items.item.senderId &&
-                      items.item?.receiver?.blocked_users?.includes(auth?.user?._id)
-                        ||
-                          auth?.user?._id === items.item?.receiverId &&
-                            items.item?.sender?.blocked_users?.includes(auth?.user?._id)
+                      {(auth.user?._id === items.item.senderId &&
+                        items.item?.receiver?.blocked_users?.includes(
+                          auth?.user?._id
+                        )) ||
+                      (auth?.user?._id === items.item?.receiverId &&
+                        items.item?.sender?.blocked_users?.includes(
+                          auth?.user?._id
+                        ))
                         ? "Chatrr User"
-                        : auth.user?._id === items.item.senderId ? items.item?.receiver?.name : items.item?.sender?.name}
+                        : auth.user?._id === items.item.senderId
+                        ? items.item?.receiver?.name
+                        : items.item?.sender?.name}
                     </Text>
                     <Text numberOfLines={1} style={styles.subTitle}>
                       {items.item?.chat[items.item.chat.length - 1]?.createdAt
@@ -296,17 +358,28 @@ const ChatList = () => {
                       justifyContent: "space-between",
                     }}
                   >
-                    <Text numberOfLines={2} style={[styles.subTitle, {width: '80%'}]}>
+                    <Text
+                      numberOfLines={2}
+                      style={[styles.subTitle, { width: "80%" }]}
+                    >
                       {items.item?.chat[items.item.chat.length - 1]?.message
                         ?.message
                         ? items.item?.chat[
                             items.item.chat.length - 1
-                          ]?.message?.message.slice(0, 40)
-                        : auth.user?._id === items.item.chat[items.item.chat.length - 1]?.sender && items.item.chat[items.item.chat.length - 1]?.message
-                        ?.asset_id
+                          ]?.message?.message?.slice(0, 40)
+                        : auth.user?._id ===
+                            items.item.chat[items.item.chat.length - 1]
+                              ?.sender &&
+                          items.item.chat[items.item.chat.length - 1]?.message
+                            ?.asset_id
                         ? "You Sent An Attachment"
-                        : auth.user?._id === items.item.chat[items.item.chat.length - 1]?.reciever && items.item.chat[items.item.chat.length - 1]?.message
-                        ?.asset_id ? (`${items.item?.sender?.name} Sent you An Attachment`) : null}
+                        : auth.user?._id ===
+                            items.item.chat[items.item.chat.length - 1]
+                              ?.reciever &&
+                          items.item.chat[items.item.chat.length - 1]?.message
+                            ?.asset_id
+                        ? `${items.item?.sender?.name} Sent you An Attachment`
+                        : null}
                     </Text>
                     {items.item.chat[items.item.chat.length - 1]?.message
                       ?.asset_id ? (

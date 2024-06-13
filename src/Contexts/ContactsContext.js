@@ -4,9 +4,10 @@ const ContactsContext = createContext();
 
 const ContactsProvider = ({children}) => {
     const [users, setUsers] = useState([]);
+    const [matchedContacts, setMatchedContacts] = useState([]);
 
     return (
-        <ContactsContext.Provider value={[users, setUsers]} >
+        <ContactsContext.Provider value={[users, setUsers, matchedContacts, setMatchedContacts]} >
             {children}
         </ContactsContext.Provider>
     )

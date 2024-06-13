@@ -1,7 +1,7 @@
 import { View, Text, Image } from 'react-native'
 import React from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native'
-import Lightbox from 'react-native-lightbox/Lightbox';
+import Lightbox from 'react-native-lightbox/Lightbox.js';
 
 
 const ImageViewerScreen = () => {

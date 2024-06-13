@@ -26,6 +26,10 @@ import * as ImagePicker from "expo-image-picker";
 import Toast from "react-native-simple-toast";
 import * as MediaLibrary from "expo-media-library";
 import * as DocumentPicker from "expo-document-picker";
+import SelectedFileScreen from "../../Screens/SelectedFileScreen";
+import { useNavigation } from "@react-navigation/native";
+import { useReply } from "../../Contexts/MessageContext";
+import { useReplyMessage } from "../../Contexts/ReplyContext";
 
 const InputBox = ({ reciever, convoId, sender }) => {
   const [input, setInput] = useState("");
@@ -36,23 +40,53 @@ const InputBox = ({ reciever, convoId, sender }) => {
   const [select, setSelect] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [auth] = useAuth();
+  const [repliedMessage] = useReplyMessage();
+  const [isReplying, setIsReplying] = useReply();
+  const [selectedMessage] = useReply();
 
-  const qureies = {
+
+  const navigator = useNavigation();
+
+  const qureiesForNewMessage = {
     reciever: auth.user._id === reciever ? sender : reciever,
     sender: auth.user._id,
     message: input ? input : uri,
     convoId: convoId,
   };
 
+
+  const qureiesForReply = {
+    reciever: auth.user._id === reciever ? sender : reciever,
+    sender: auth.user._id,
+    message : repliedMessage,
+    reply: input ? input : uri,
+    convoId: convoId,
+  };
+
   useEffect(() => {
     socketServcies.initializeSocket();
   }, []);
+// console.log(repliedMessage)
 
   const sendMessage = async () => {
     try {
       if (!!input) {
-        socketServcies.emit("send-message", qureies);
+        socketServcies.emit("send-message", qureiesForNewMessage);
         setInput("");
+        return;
+      }
+      alert("Message Cannot me empty");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const reply = async () => {
+    try {
+      if (!!input) {
+        socketServcies.emit("reply-message", qureiesForReply);
+        setInput("");
+        setIsReplying(!isReplying);
         return;
       }
       alert("Message Cannot me empty");
@@ -136,43 +170,16 @@ const InputBox = ({ reciever, convoId, sender }) => {
         allowsEditing: true,
       });
 
-      try {
-        console.log(assets);
-
-        const formdata = new FormData();
-        if (!assets) {
-          Toast.show("No Image Selected");
-          return;
-        } else {
-          formdata.append("photo", {
-            name: new Date() + "_image",
-            uri: assets[0].uri,
-            type: "image/jpg",
-          });
-
-          formdata.append("sender", sender);
-          formdata.append("reciever", reciever);
-
-          const { data } = await axios.post(
-            `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/media/send-photo/`,
-            formdata,
-            {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          if (data?.success) {
-            Toast.show(data?.message);
-          } else {
-            Toast.show(data?.message);
+      if(assets?.length > 0) {
+        navigator.navigate("Caption", {
+          params: {
+            uri: assets[0]?.uri,
+            type: assets[0]?.type,
+            name: assets[0]?.fileName,
+            sender: sender,
+            reciever: reciever
           }
-        }
-      } catch (error) {
-        console.log(error.message);
-        Toast.show(error.message + ", " + "Please Try Again");
+        });
       }
     }
   };
@@ -192,11 +199,8 @@ const InputBox = ({ reciever, convoId, sender }) => {
       });
 
       try {
-        Toast.show("Sending Video...");
-        console.log(assets[0]);
         const formdata = new FormData();
-        if (!assets) {
-          Toast.show("No Video Selected");
+        if (assets === null) {
           return;
         } else {
           formdata.append("video", {
@@ -232,57 +236,30 @@ const InputBox = ({ reciever, convoId, sender }) => {
     }
   };
 
-  //sending audio file
 
   const sendAudio = async () => {
     const granted = await MediaLibrary.requestPermissionsAsync();
-  // console.log(granted);
     if (granted.status !== "granted") {
       Toast.show("Sorry, Please Allow to Procceed Further");
       return;
     } else {
       const { assets } = await DocumentPicker.getDocumentAsync();
 
-      try {
-        Toast.show("Sending Audio...");
-        console.log(assets[0]);
-        const formdata = new FormData();
-        if (!assets) {
-          Toast.show("No Audio File Selected");
-          return;
-        } else {
-          formdata.append("audio", {
-            name: new Date() + "_audio",
-            uri: assets[0].uri,
-            type: "audio/mp3",
-          });
-
-          formdata.append("sender", sender);
-          formdata.append("receiver", reciever);
-
-          const { data } = await axios.post(
-            `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/media/send-audio`,
-            formdata,
-            {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          if (data?.success) {
-            Toast.show(data?.message);
-          } else {
-            Toast.show(data?.message);
+      if(assets?.length > 0) {
+        navigator.navigate("Caption", {
+          params: {
+            uri: assets[0]?.uri,
+            type: assets[0]?.mimeType,
+            name: assets[0]?.name,
+            sender: sender,
+            reciever: reciever
           }
-        }
-      } catch (error) {
-        Toast.show(error.message + ", " + "Please Try Again");
-        console.log(error.message);
+        });
       }
     }
   };
+
+  // console.log(isReplying);
 
   return (
     <>
@@ -291,7 +268,7 @@ const InputBox = ({ reciever, convoId, sender }) => {
           style={{
             width: "90%",
             height: "30%",
-            backgroundColor: "rgba(18, 115, 212, 0.8)",
+            backgroundColor: "rgba(18, 115, 212, 1)",
             alignSelf: "center",
             borderRadius: 10,
             alignItems: "center",
@@ -368,8 +345,18 @@ const InputBox = ({ reciever, convoId, sender }) => {
           </View>
         </View>
       ) : null}
+      
+          {
+            isReplying && (
+              <View style={{backgroundColor: 'lightblue', width: '95%', height: 60, alignSelf: 'center', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, borderWidth: StyleSheet.hairlineWidth, borderColor: 'gray'}} >
+       <Entypo onPress={() => {setIsReplying(!isReplying)}} name="circle-with-cross" size={20} color={'black'} style={{position: 'absolute', right: -3, top: -6}} />
+     <Text style={{fontSize: 18, color: 'white'}} >{selectedMessage?.message?.message}</Text>
+      </View>
+            )
+          }
+       
       <SafeAreaView edges={["bottom"]} style={styles.container}>
-        <TouchableOpacity style={styles.plus}>
+        <TouchableOpacity onPress={() => (!select ? setSelect(true) : setSelect(false))} style={styles.plus}>
           <AntDesign
             onPress={() => (!select ? setSelect(true) : setSelect(false))}
             name="plus"
@@ -396,7 +383,7 @@ const InputBox = ({ reciever, convoId, sender }) => {
           {input ? (
             <MaterialIcons
               style={styles.send}
-              onPress={sendMessage}
+              onPress={() => {isReplying ? reply() : sendMessage()}}
               name="send"
               size={20}
               color={"white"}
