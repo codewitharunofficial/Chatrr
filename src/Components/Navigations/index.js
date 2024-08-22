@@ -25,8 +25,11 @@ import StoryViewer from "../../Screens/StoryViewer";
 import SelectedFileScreen from "../../Screens/SelectedFileScreen";
 import MainScreen from "../../Screens/MainScreen";
 import ChatList from "../ChatListItems";
-import VoiceCallPage from "../../Screens/VoiceCallScreen";
+// import VoiceCallPage from "../../Screens/VoiceCallScreen";
 import AudioPlayer from "../../Screens/MediaHandlers/AudioPlayer";
+import CallerScreen from "../../Screens/CallScreens/CallerScreen";
+import ReceiverScreen from "../../Screens/CallScreens/ReceiverScreen";
+import CallLogsScreen from "../../Screens/CallLogsScreen";
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
 
@@ -104,15 +107,27 @@ const Navigator = () => {
           />
 
           <Stack.Screen
+            name="Calls"
+            component={CallLogsScreen}
+            options={{ headerTitleAlign: "center" }}
+          />
+
+          <Stack.Screen
             name="Conversation"
             component={Conversation}
             options={{ headerTitleAlign: "center", headerShown: false }}
           />
-          {/* <Stack.Screen
-            name="Voice-Call"
-            component={VoiceCallPage}
+          <Stack.Screen
+            name="Caller-Screen"
+            component={CallerScreen}
             options={{ headerTitleAlign: "center", headerShown: false }}
-          /> */}
+          />
+
+          <Stack.Screen
+            name="Receiver-Screen"
+            component={ReceiverScreen}
+            options={{ headerTitleAlign: "center", headerShown: false }}
+          />
 
           <Stack.Screen
             name="Audio-Player"
@@ -135,6 +150,7 @@ const Navigator = () => {
               animation: "slide_from_right",
             }}
           />
+
           <Stack.Screen
             name="Caption"
             component={SelectedFileScreen}
@@ -144,6 +160,17 @@ const Navigator = () => {
               headerTitle: "File Preview",
             }}
           />
+
+          {/* <Stack.Screen
+            name="Video"
+            component={SelectedFileScreen}
+            options={{
+              headerTitleAlign: "center",
+              headerShown: true,
+              headerTitle: "File Preview",
+            }}
+          /> */}
+
           <Stack.Screen
             name="Story-Viewer"
             component={StoryViewer}

@@ -9,33 +9,36 @@ import { SoundProvider } from "./src/Contexts/SoundContext";
 import { ContactsProvider } from "./src/Contexts/ContactsContext";
 import { MessageProvider } from "./src/Contexts/MessageContext";
 import { ReplyProvider } from "./src/Contexts/ReplyContext";
-
+import { ControlsProvider } from "./src/Contexts/PlayerControls";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
 
 export default function App() {
 
-
   return (
-    <ReplyProvider>
-
-    <MessageProvider>
-    <ContactsProvider>
-    <SoundProvider>
-    <AuthProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <SafeAreaView style={{ flex: 1 }}>
-            <View style={styles.container}>
-              <StatusBar style="auto" animated={true} />
-              <Navigator />
-            </View>
-          </SafeAreaView>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
-    </AuthProvider>
-    </SoundProvider>
-    </ContactsProvider>
-    </MessageProvider>
-    </ReplyProvider>
+    <ControlsProvider>
+      <ReplyProvider>
+        <MessageProvider>
+          <ContactsProvider>
+            <SoundProvider>
+              <AuthProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <SafeAreaProvider>
+                    <SafeAreaView style={{ flex: 1 }}>
+                      <View style={styles.container}>
+                        <StatusBar style="auto" animated={true} />
+                        <Navigator />
+                      </View>
+                    </SafeAreaView>
+                  </SafeAreaProvider>
+                </GestureHandlerRootView>
+              </AuthProvider>
+            </SoundProvider>
+          </ContactsProvider>
+        </MessageProvider>
+      </ReplyProvider>
+    </ControlsProvider>
   );
 }
 

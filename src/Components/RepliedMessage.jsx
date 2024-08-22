@@ -26,8 +26,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     container : {
-        minWidth: '30%',
-        maxWidth: "50%",
+        minWidth: '50%',
     },
     Text : {
         color: 'white',

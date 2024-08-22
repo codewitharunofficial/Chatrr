@@ -25,18 +25,21 @@ import axios from "axios";
 import { Image } from "expo-image";
 import socketServcies from "../Utils/SocketServices";
 import * as Updates from "expo-updates";
+import ChatListSkeleton from "../SkeletonScreens/ChatListSkeleton";
 
-const SettingsScreen = () => {
+const SettingsScreen = ({navigation}) => {
   const [auth, setAuth] = useAuth();
   const [user, setUser] = useState([]);
   const [userId, setUserId] = useState("");
   const [profilePhoto, setProfilePhoto] = useState("");
   const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(false);
 
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   const getAdminDetails = async () => {
     setUserId(auth.user?._id);
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/get-user/${userId}`
@@ -44,6 +47,7 @@ const SettingsScreen = () => {
       if (data.success === true) {
         setProfilePhoto(data?.user?.profilePhoto?.secure_url);
         setUser(data.user);
+        setLoading(false);
       }
     } catch (error) {
       console.log(error);
@@ -75,9 +79,9 @@ const SettingsScreen = () => {
   };
 
   useEffect(() => {
-    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+   const backHandler = BackHandler.addEventListener("hardwareBackPress", handleBackButton);
     return () => {
-      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+      backHandler.remove();
     };
   }, [isFocused]);
 
@@ -104,25 +108,13 @@ const SettingsScreen = () => {
 
   return (
     <>
-      {!user ? (
-        <View
-          style={{
-            width: "100%",
-            height: "100%",
-            flexDirection: "column",
-            justifyContent: "space-around",
-          }}
-        >
-          <ActivityIndicator
-            aria-valuetext="Chatrr is Loading..."
-            size={"large"}
-            color={"royalblue"}
-            style={{ alignSelf: "center" }}
-          />
-        </View>
-      ) : (
+      {
         <View style={styles.container}>
-          <TouchableOpacity style={styles.TouchableOpacity}>
+          {
+            loading ? (
+              <ChatListSkeleton />
+            ) : (
+              <TouchableOpacity style={styles.TouchableOpacity}>
             {profilePhoto ? (
               <Image
                 source={
@@ -150,6 +142,8 @@ const SettingsScreen = () => {
               </View>
             </View>
           </TouchableOpacity>
+            )
+          }
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile")}
             style={styles.item}
@@ -182,7 +176,7 @@ const SettingsScreen = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      )}
+      }
     </>
   );
 };

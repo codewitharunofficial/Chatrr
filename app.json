@@ -12,6 +12,10 @@
       "backgroundColor": "#ffffff",
       "plugins": [
         [
+          "react-native-reanimated/plugin",
+          {
+             "relativePath": "node_modules/react-native-reanimated/plugin.js"
+          },
           "expo-document-picker",
           {
             "storagePermission": "Allow Chatrr to access you device storage"
@@ -32,6 +36,13 @@
           "expo-updates",
           {
             "username": "codewitharun"
+          },
+          "@config-plugins/react-native-webrtc",
+          "expo-build-properties",
+          {
+            "android": {
+              "enableProgaurdInReleaseBuilds": true
+            }
           }
         ]
       ]
@@ -77,7 +88,8 @@
     },
     "plugins": [
       "expo-font",
-      "expo-build-properties"
+      "expo-build-properties",
+      "@config-plugins/react-native-webrtc"
     ]
   }
 }

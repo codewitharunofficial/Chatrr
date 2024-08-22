@@ -2,7 +2,7 @@ import { createContext, useState } from "react";
 
 const PlayerControls = createContext();
 
-const ControlsContext = ({children}) => {
+const ControlsProvider = ({children}) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [position, setPosition] = useState(0);
     const [progress, setProgress] = useState(0);
@@ -19,4 +19,4 @@ const ControlsContext = ({children}) => {
     )
 }
 
-export {PlayerControls, ControlsContext};
+export {PlayerControls, ControlsProvider};

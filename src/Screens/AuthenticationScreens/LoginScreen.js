@@ -71,7 +71,7 @@ const LoginScreen = () => {
         navigation.navigate("Login");
       }
     } catch (error) {
-      console.log(error.message);
+      ToastAndroid.show(error.message, 3000);
       setLoading(false);
     }
   };

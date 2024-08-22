@@ -15,11 +15,14 @@ import client from "../../Components/utils/client";
 import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator } from "react-native-paper";
 // import toast from "react-hot-toast";
 
 const SignUpScreen = () => {
   //navigation
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
+
 
   //states
 
@@ -41,6 +44,7 @@ const SignUpScreen = () => {
 
   const signUp = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.post(
         `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/create-user`,
         { ...value }
@@ -52,6 +56,7 @@ const SignUpScreen = () => {
           user: data.user,
           token: data.token,
         });
+        setLoading(false);
 
         AsyncStorage.setItem("auth", JSON.stringify(data));
         AsyncStorage.setItem("isLogged", "true");
@@ -60,13 +65,33 @@ const SignUpScreen = () => {
         ToastAndroid.show(data?.message, ToastAndroid.TOP);
       }
     } catch (error) {
-      console.log(error.message);
+      ToastAndroid.show(error, 5000);
+      setLoading(false);
     }
   };
 
   return (
-    <ScrollView>
-      <View style={{ paddingBottom: 60, marginTop: 60 }}>
+    <>
+    {
+      loading ? (
+        <View
+        style={{
+          width: "100%",
+            height: "100%",
+            flexDirection: "column",
+            justifyContent: "space-around",
+          }}
+        >
+          <ActivityIndicator
+            aria-valuetext="Chatrr is Loading..."
+            size={"large"}
+            color={"royalblue"}
+            style={{ alignSelf: "center" }}
+            />
+            </View>
+            ) : (
+            <ScrollView>
+          <View style={{ paddingBottom: 60, marginTop: 60 }}>
         <View style={styles.container}>
           <Image
             src="https://cdn-icons-png.flaticon.com/512/3032/3032932.png"
@@ -150,7 +175,10 @@ const SignUpScreen = () => {
           </View>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+        )
+      }
+    </>
   );
 };
 

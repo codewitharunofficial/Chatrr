@@ -30,33 +30,58 @@ const UpdatesScreen = () => {
   const navigation = useNavigation();
 
   const handlePress = async () => {
-    try {
-      const permission = await ImagePicker.requestCameraPermissionsAsync();
+    // try {
+    //   const permission = await ImagePicker.requestCameraPermissionsAsync();
+    //   if (permission.status !== "granted") {
+    //     Toast.show("Sorry, Please Allow to Procceed Further");
+    //   } else {
+    //     const { assets } = await ImagePicker.launchCameraAsync({
+    //       allowsEditing: true,
+    //       mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //       videoMaxDuration: 30,
+    //     });
+    //     if (assets[0].type === "video") {
+    //       Toast.show(
+    //         "Video Status Will Be Updated & Will Be Deleted After 24hrs"
+    //       );
+    //     } else if (assets[0].type === "image") {
+    //       Toast.show(
+    //         "Image Status Will Be Updated & Will Be Deleted After 24hrs"
+    //       );
+    //     } else {
+    //       Toast.show("Wait What??");
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.log(error.message);
+    // }
+  };
 
-      if (permission.status !== "granted") {
-        Toast.show("Sorry, Please Allow to Procceed Further");
+  const uploadStatus = async () => {
+    try {
+      const libraryPermissions =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (libraryPermissions.status !== "granted") {
+        Toast.show("Sorry Please Give Permissions");
       } else {
-        const { assets } = await ImagePicker.launchCameraAsync({
+        const { assets } = await ImagePicker.launchImageLibraryAsync({
           allowsEditing: true,
           mediaTypes: ImagePicker.MediaTypeOptions.All,
-          videoMaxDuration: 30,
         });
+        console.log(assets);
 
-        if (assets[0].type === "video") {
-          Toast.show(
-            "Video Status Will Be Updated & Will Be Deleted After 24hrs"
-          );
-        } else if (assets[0].type === "image") {
-          Toast.show(
-            "Image Status Will Be Updated & Will Be Deleted After 24hrs"
-          );
-        } else {
-          Toast.show("Wait What??");
+        if (assets[0].mimeType === "video/mp4") {
+          navigation.navigate("Caption", {
+            params: {
+              type: assets[0].type,
+              uri: assets[0].uri,
+              duration: assets[0].duration,
+            },
+          });
         }
       }
-    } catch (error) {
-      console.log(error.message);
-    }
+    } catch (error) {}
   };
 
   const handleAlbum = async () => {
@@ -141,7 +166,6 @@ const UpdatesScreen = () => {
         `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/status/get-all-status`
       );
       setStories(data?.status);
-      
     } catch (error) {
       console.log(error.message);
     }
@@ -160,7 +184,7 @@ const UpdatesScreen = () => {
 
   const handleAllStories = async (story) => {
     navigation.navigate("Story-Viewer", {
-      stories: story?.stories
+      stories: story?.stories,
     });
     // console.log(story);
   };
@@ -251,7 +275,7 @@ const UpdatesScreen = () => {
             (story) =>
               story?.author?._id !== auth.user?._id && (
                 <TouchableOpacity
-                key={story?.author?._id}
+                  key={story?.author?._id}
                   onPress={() => handleAllStories(story)}
                   style={{
                     width: "100%",
@@ -296,7 +320,7 @@ const UpdatesScreen = () => {
           <TouchableOpacity
             onPress={handlePress}
             style={{
-              width: "20%",
+              width: "15%",
               height: "15%",
               justifyContent: "center",
               backgroundColor: "#00d4ff",
@@ -307,13 +331,13 @@ const UpdatesScreen = () => {
               shadowColor: "lightgray",
             }}
           >
-            <FontAwesome style={styles.camera} name="camera" size={20} />
+            <FontAwesome style={styles.camera} name="camera" size={25} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={handleAlbum}
+            onPress={uploadStatus}
             style={{
-              width: "20%",
+              width: "15%",
               height: "15%",
               justifyContent: "center",
               backgroundColor: "#00d4ff",
@@ -324,7 +348,7 @@ const UpdatesScreen = () => {
               shadowColor: "lightgray",
             }}
           >
-            <Ionicons name="albums" style={styles.camera} size={20} />
+            <Ionicons name="albums" style={styles.camera} size={25} />
           </TouchableOpacity>
         </View>
       </View>

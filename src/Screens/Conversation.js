@@ -8,7 +8,7 @@ import {
   Image,
   ToastAndroid,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Message from "../Components/Message";
 import InputBox from "../Components/Input/InputBox";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -27,8 +27,9 @@ import {
 import { BackHandler } from "react-native";
 import moment from "moment";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { call } from "../Functions";
 const Conversation = ({navigation}) => {
+
   const [reciever, setReciever] = useState("");
   const [convoId, setConvoId] = useState("");
   const [sender, setSender] = useState("");
@@ -47,9 +48,6 @@ const Conversation = ({navigation}) => {
   const [userDetails, setUserDetails] = useState({});
   const [blocked, setBlocked] = useState("");
   const [isBlocked, setIsBlocked] = useState("");
-  const [localStream, setLocalStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
-  const [peerConnection, setPeerConnection] = useState(null);
 
   const route = useRoute();
   // const navigation = useNavigation();
@@ -113,8 +111,7 @@ const Conversation = ({navigation}) => {
     });
   }, []);
 
-  //marking messages as seen
-  // console.log(newMessage.from.name);
+  // console.log(auth?.user);
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -146,7 +143,7 @@ const Conversation = ({navigation}) => {
             body: newMessage.message
               ? newMessage.message.message
               : "You May Have Unread Messages",
-            priority: Notifications.AndroidNotificationPriority,
+            priority: Notifications.AndroidNotificationPriority.MAX,
             sound: true,
             vibrate: 2,
           },
@@ -173,14 +170,12 @@ const Conversation = ({navigation}) => {
   }, [newMessage?.message]);
 
   const handleCall = async () => {
-    navigation.navigate("Voice-Call", {
-      params: {
-        user: {
-          userID: reciever,
-          name: user?.name,
-          callID: reciever + Date.now()
-        },
-      },
+    await call(sender, reciever, name, auth?.user?.photo?.secure_url);
+    navigation.navigate("Caller-Screen", {
+      sender: sender,
+      receiver: reciever,
+      photo: photo,
+      name: name,
     });
   };
 
@@ -296,6 +291,7 @@ const Conversation = ({navigation}) => {
       <ImageBackground src="" style={styles.bg}>
         <FlatList
           data={chat.length > 0 ? chat : messages}
+          maxToRenderPerBatch={10}
           renderItem={(items) => (
             <Message message={items} receiver={reciever} read={{ read }} />
           )}

@@ -9,6 +9,7 @@ import {
   Modal,
   Alert,
   ToastAndroid,
+  Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
@@ -16,22 +17,22 @@ import axios from "axios";
 import { useAuth } from "../../Contexts/auth";
 import socketServcies from "../../Utils/SocketServices";
 import { useIsFocused } from "@react-navigation/native";
-import { Image } from "expo-image";
+// import { Image } from "expo-image";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
 import {
   Entypo,
   FontAwesome,
   Ionicons,
+  MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
 import Toast from "react-native-simple-toast";
 import { BackHandler } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useContacts } from "../../Contexts/ContactsContext";
+import ChatListSkeleton from "../../SkeletonScreens/ChatListSkeleton";
+import {sendPushNotification, sendPushNotificationForIncomingCall} from '../../Functions';
 
-const ChatList = () => {
-  const navigate = useNavigation();
-
+const ChatList = ({ navigation }) => {
   const [auth] = useAuth();
   const [chats, setChat] = useState([]);
   const [chat, setChats] = useState([]);
@@ -40,26 +41,21 @@ const ChatList = () => {
   const [messagesId, setMessagesId] = useState("");
   const [lastMessage, setLastMessage] = useState({});
   const [receiverId, setReceiverId] = useState("");
-  // const [active, setActive] = useState("");
   const [blocked, setBlocked] = useState([]);
-  const [contacts, setContacts] = useState();
+  const [savedContacts, setSavedContacts] = useState([]);
+  const [savedChats, setSavedChats] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [read, setRead] = useState(false);
+  const [opened, setOpened] = useState(false);
 
   const id = auth?.user?._id;
+
+  let dummy = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   useEffect(() => {
     socketServcies.initializeSocket();
   }, []);
-  
-  async function getContacts(){
-    const data = await AsyncStorage.getItem("contacts");
-      const res = JSON.parse(data);
-      setContacts(res);
-  }
-  useEffect(() => {
-    getContacts();
-  }, [isFocused]);
 
   useEffect(() => {
     socketServcies.on("recieved-message", (msg) => {
@@ -73,11 +69,26 @@ const ChatList = () => {
       BackHandler.exitApp();
       ToastAndroid.show("Exited App", 2000);
     };
-    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    const backhandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackButton
+    );
     return () => {
-      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+      backhandler.remove();
     };
   }, [isFocused]);
+
+  useEffect(() => {
+   async function getSavedChats() {
+    setLoading(true);
+     const data = await AsyncStorage.getItem("chats");
+     const allChats = JSON.parse(data);
+     // console.log("Saved Chats", allChats);
+     setSavedChats(allChats);
+     setLoading(false);
+   }
+   getSavedChats();
+  }, []);
 
   useEffect(() => {
     setBlocked(auth?.user?.blocked_users);
@@ -98,37 +109,29 @@ const ChatList = () => {
     }
   };
 
+  useEffect(() => {
+    socketServcies.on('incoming-call', ({sender, senderPhoto, name, receiver, callId}) => {
+      if(receiver === id ){
+        navigation.navigate('Receiver-Screen', {peerId: sender, profilePhoto: senderPhoto, callId});
+        sendPushNotificationForIncomingCall(name, senderPhoto);
+      }
+    });
+  }, []);
+
   const getChats = async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/messages/chats/${id}`
       );
-      // console.log(data);
+
       if (data?.success === true) {
-        contacts?.forEach((contact) => {
-          data.chats.forEach((chat) => {
-             if(chat.sender.phone === contact.phone){
-               chat.sender.name = contact.name;
-               chats.push(chat);
-               
-             } else if(chat?.receiver?.phone === contact?.phone){
-               chat.receiver.name = contact.name;
-               chats.push(chat);
-               
-             } else {
-               return;
-             }
-           });
-        
-        })
-        AsyncStorage.setItem("chats", JSON.stringify(chats));
+        setChat(data?.chats);
+        setLoading(false);
       }
     } catch (error) {
       console.log(error.message);
-      const data = await AsyncStorage.getItem("chats");
-      const allChats = JSON.parse(data);
-      // console.log("Saved Chats", allChats);
-      setChat(allChats);
+      setLoading(false); 
     }
   };
 
@@ -157,13 +160,12 @@ const ChatList = () => {
 
   useEffect(() => {
     socketServcies.initializeSocket();
-
     socketServcies.emit("connected", auth?.user?._id);
   }, []);
 
   return (
     <>
-      {chats?.length === 0 ? (
+      {chats?.length === 0 && savedChats?.length === 0 ? (
         <View
           style={{
             width: "100%",
@@ -185,27 +187,34 @@ const ChatList = () => {
             <Text style={{ fontSize: 16 }}>Above</Text>
           </View>
         </View>
+      ) : loading && chats.length < 1 ? (
+        <View style={{width: '100%', height: '100%'}} >
+          <FlatList data={dummy} renderItem={items => <ChatListSkeleton />} />
+        </View>
       ) : (
         <FlatList
+        contentContainerStyle={{gap: 10}}
+        scrollEnabled={true}
           data={chats}
           renderItem={(items) => (
             <Swipeable
               renderLeftActions={(progress, dragX) => {
                 const trans = dragX.interpolate({
-                  inputRange: [0, 50, 100, 101],
-                  outputRange: [20, 0, 0, 1],
+                  inputRange: [0, 25, 100, 101],
+                  outputRange: [1, 0, 0, 1],
                 });
                 return (
                   <RectButton
                     style={{
+                      display: "flex",
                       justifyContent: "center",
                       paddingHorizontal: 10,
                       alignItems: "center",
-                      backgroundColor: "#00d4ff",
+                      backgroundColor: opened ? "#00d4ff" : "white",
                       borderRadius: 10,
                       height: "80%",
                       marginTop: 5,
-                      width: "40%",
+                      width: "20%",
                     }}
                     onPress={() => {
                       setConvoId("");
@@ -219,10 +228,14 @@ const ChatList = () => {
                         name="delete"
                         size={30}
                         color={"white"}
+                        // style={{position: 'absolute', left: 0}}
                       />
                     </Animated.Text>
                   </RectButton>
                 );
+              }}
+              onSwipeableOpenStartDrag={() => {
+                setOpened(true);
               }}
               onSwipeableOpen={(left) => {
                 setConvoId(items.item._id);
@@ -233,12 +246,13 @@ const ChatList = () => {
                 );
               }}
               onSwipeableClose={(right) => {
+                setOpened(false);
                 setConvoId("");
               }}
             >
               <TouchableOpacity
                 onPress={() => {
-                  navigate.navigate("Conversation", {
+                  navigation.navigate("Conversation", {
                     id: items.item?._id,
                     name:
                       (auth.user?._id === items.item.senderId &&
@@ -445,6 +459,24 @@ const ChatList = () => {
           )}
         />
       )}
+      <View style={styles.camContainer}>
+          <TouchableOpacity
+            // onPress={handlePress}
+            style={{
+              width: "20%",
+              height: "15%",
+              justifyContent: "center",
+              backgroundColor: "#00d4ff",
+              alignSelf: "flex-end",
+              marginRight: 20,
+              alignItems: "center",
+              borderRadius: 30,
+              shadowColor: "lightgray",
+            }}
+          >
+            <MaterialCommunityIcons style={styles.camera} color={'white'} name="message-plus" size={30} />
+          </TouchableOpacity>
+        </View>
     </>
   );
 };
@@ -456,14 +488,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   photo: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     borderRadius: 30,
     marginRight: 10,
   },
   content: {
     flex: 1,
-    // backgroundColor: 'teal',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "lightgray",
   },
@@ -481,6 +512,15 @@ const styles = StyleSheet.create({
   subTitle: {
     color: "grey",
   },
+  camContainer: {
+    width: "100%",
+    height: "80%",
+    justifyContent: "flex-end",
+    gap: 10,
+    position: "absolute",
+    bottom: 20,
+  },
+  camera: {}
 });
 
 export default ChatList;

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import moment from "moment";
 import { useAuth } from "../../Contexts/auth";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
 import {
   AntDesign,
@@ -28,6 +28,7 @@ import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { useReply } from "../../Contexts/MessageContext";
 import { useReplyMessage } from "../../Contexts/ReplyContext";
 import RepliedMessage from "../RepliedMessage";
+import { PlayerControls } from "../../Contexts/PlayerControls";
 const Message = ({ message, receiver, read }) => {
   const [auth] = useAuth();
 
@@ -36,7 +37,7 @@ const Message = ({ message, receiver, read }) => {
   const [selected, setselected] = useState("");
   const [deselect, setDeselect] = useState(false);
   const [sound, setSound] = useSound();
-  const [currentTrack, setCurrentTrack] = useSound();
+  const {currentTrack, setCurrentTrack} = useContext(PlayerControls);
   const [url, setUrl] = useState("");
   const [canPlay, setCanPlay] = useState(false);
   const [uri, setUri] = useState("");
@@ -45,7 +46,7 @@ const Message = ({ message, receiver, read }) => {
   const [publicId, setPublicId] = useState("");
   const [status, setStatus] = useState({});
   const video = useRef(null);
-  const [isPlaying, setIsPLaying] = useState(false);
+  const {isPlaying, setIsPLaying} = useContext(PlayerControls);
   const [duration, setDuration] = useState();
   const [pause, setPause] = useState(false);
   const [position, setPosition] = useState(0);
@@ -128,12 +129,11 @@ const Message = ({ message, receiver, read }) => {
     >
       <Swipeable
         containerStyle={{ width: "100%" }}
-        renderRightActions={
-          auth?.user?._id === message.item.sender
-            ? (progress, dragX) => {
+        renderLeftActions={
+       (progress, dragX) => {
                 const trans = dragX.interpolate({
-                  inputRange: [0, 50, 100, 101],
-                  outputRange: [0, 0, 0, 1],
+                  inputRange: [0, 25, 100, 150],
+                  outputRange: [5, 0, 0, -1],
                 })
                 ;
                 return (
@@ -166,11 +166,10 @@ const Message = ({ message, receiver, read }) => {
                   </RectButton>
                 );
               }
-            : null
         }
         
-        onSwipeableOpen={(right) => {
-          if(right){
+        onSwipeableOpen={(left) => {
+          if(left){
             setRepliedMessage(message?.item?.message);
             setIsReplying(true);
             setSelectedMessage(message?.item);

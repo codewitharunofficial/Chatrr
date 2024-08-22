@@ -18,12 +18,13 @@ import { PermissionsAndroid } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { useIsFocused } from "@react-navigation/native";
 import { Image } from "expo-image";
+import ProfileSkeleton from "../SkeletonScreens/ProfileSkeleton";
 
 
-const SettingsScreen = () => {
+const SettingsScreen = ({navigation}) => {
   const [auth, setAuth] = useAuth();
 
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
   const [id, setId] = useState('');
   const isFocused = useIsFocused();
   const [userId, setUserId] = useState('');
@@ -35,12 +36,25 @@ const SettingsScreen = () => {
 
   const [photo, setPhoto] = useState('');
   const [profilePhoto, setProfilePhoto] = useState('');
-
   const [editable, setEditable] = useState(false);
+
+
+  useEffect(() => {
+    const handleBackButton = () => {
+      navigation.goBack();
+      return true;
+    }
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
+
 
 
   const getAdminDetails = async () => {
     setUserId(auth?.user?._id);
+    setLoading(true);
     try {
       const {data} = await axios.get(`${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/users/get-user/${userId}`);
     if(data.success === true) {
@@ -49,6 +63,7 @@ const SettingsScreen = () => {
       setPhone(data.user.phone);
       setEmail(data.user.email);
       setAdmin(data.user);
+      setLoading(false);
     }
     } catch (error) {
       console.log(error);
@@ -117,17 +132,7 @@ const SettingsScreen = () => {
         }
   };
 
-  const handleBackButton = () => {
-    navigation.navigate("Settings");
-  };
-
-  useEffect(() => {
-    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
-    return () => {
-      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
-    };
-  }, [isFocused]);
-
+  
   const updateUserDetails = async () => {
        try {
         
@@ -147,15 +152,14 @@ const SettingsScreen = () => {
        }
   }
   return (
+   loading ? (
+    <ProfileSkeleton />
+   ) : (
     <>
     {
-      !admin ? (
-        <View style={{ width: '100%', height: '100%', flexDirection: 'column', justifyContent: 'space-around'}} >
-        <ActivityIndicator aria-valuetext="Chatrr is Loading..." size={"large"} color={'royalblue'} style={{alignSelf: 'center'}} />
-      </View>
-      ) : (
+      <>
         <View style={styles.container}>
-      <View style={{ width: '40%', height: '20%', alignSelf: 'center', borderRadius:60, marginBottom: 20, marginTop: 30,}} >
+      <View style={{ display: 'flex', width: '40%', height: '20%', alignSelf: 'center', borderRadius:60, marginBottom: "10%", marginTop: '15%', alignItems: 'center'}} >
       <View
         style={{
           width: "100%",
@@ -175,9 +179,9 @@ const SettingsScreen = () => {
             <FontAwesome name="user-circle" color={'lightgray'} size={112} />
           )
         }
+        <MaterialIcons onPress={uploadPhoto} name="photo-camera" size={30} color='lightblue' 
+        style={{position: 'absolute', left: '70%', top: '55%', zIndex: 1}} />
       </View>
-        <MaterialIcons onPress={uploadPhoto} name="photo-camera" size={30} color='skyblue' 
-        style={{position: 'absolute', left: '62%', top: '52%', zIndex: 1}} />
         </View>
         <ScrollView style={{padding: 10}} >
         <View style={{width: '100%', height: '80%', marginTop: 10,}} >
@@ -212,13 +216,17 @@ const SettingsScreen = () => {
         <TouchableOpacity onPress={updateUserDetails} style={{alignSelf: 'center', backgroundColor: '#00d4ff', padding: 10, borderRadius: 10, marginVertical: 10}} >
       <Text>Save <MaterialCommunityIcons name="content-save-check-outline" size={20} /> </Text>
     </TouchableOpacity>
-      ) : null
+      ) : (
+        null
+      )
     }
     </ScrollView>
     </View>
-      )
+      </>
+     
     }
     </>
+   )
   );
 };
 
