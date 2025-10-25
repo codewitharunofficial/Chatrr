@@ -234,7 +234,7 @@ const ChatList = () => {
             </View>
           ) : (
             <Image
-              source={{ uri: auth.user?._id === item.senderId ? item.receiver.profilePhoto?.secure_url : item.sender.profilePhoto?.secure_url }}
+              source={{ uri: auth.user?._id === item.senderId ? item.receiver?.profilePhoto?.secure_url : item.sender?.profilePhoto?.secure_url }}
               style={styles.avatar}
             />
           )}
